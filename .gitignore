@@ -1,0 +1,112 @@
+# ============================================================
+# CheckCA2023 - .gitignore
+# PowerShell + Visual Studio 2022
+# ============================================================
+
+# ---------------------------------------------------------------
+# VS2022 project files (used as editor only — not part of the project)
+# ---------------------------------------------------------------
+*.csproj
+*.sln
+App.xaml
+
+# ---------------------------------------------------------------
+# Visual Studio 2022
+# ---------------------------------------------------------------
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Build results
+bin/
+obj/
+out/
+build/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Roslyn cache
+*.aps
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# ---------------------------------------------------------------
+# PowerShell
+# ---------------------------------------------------------------
+
+# PowerShell session state
+*.pssc
+
+# Module build artifacts
+Release/
+PSGetModuleInfo.xml
+
+# ---------------------------------------------------------------
+# Windows
+# ---------------------------------------------------------------
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ---------------------------------------------------------------
+# Logs & temp files
+# ---------------------------------------------------------------
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.cache
+
+# ---------------------------------------------------------------
+# Sensitive / personal data — never commit these
+# ---------------------------------------------------------------
+*.pfx
+*.p12
+*.key
+*.pem
+secrets.*
+config.local.*
+*.env
