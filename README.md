@@ -99,7 +99,7 @@ Import-Module -Name UEFIv2
 1. Clone or download this repository:
 
 ```powershell
-git clone https://github.com/YourUsername/CheckCA2023.git
+git clone https://github.com/claude-boucher/CheckCA2023.git
 ```
 
 2. Navigate to the project folder:
