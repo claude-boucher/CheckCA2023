@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.1.0] - 2026-02-22
+
+### Added
+
+- **Set AvailableUpdates button** — sets the `AvailableUpdates` registry key to `0x5944` directly from the GUI, replacing the manual `reg add` command
+- **Start "Secure-Boot-Update" Task button** — triggers the `\Microsoft\Windows\PI\Secure-Boot-Update` scheduled task directly from the GUI, replacing the manual `Start-ScheduledTask` command
+- **Create/Append logs to CSV button** — saves a snapshot of the current registry values and Event Viewer entries to a CSV log file (`Log_CheckCA2023.csv`), allowing historical tracking of the deployment progress over time
+- **Application logo and version number** included in the GUI
+
+---
+
 ## [1.0.0] - 2026-02-21
 
 ### Initial Release

@@ -1,8 +1,8 @@
-# CheckCA2023
+﻿# CheckCA2023
 
 > A PowerShell utility with a XAML GUI to monitor and validate the Microsoft CA 2023 Secure Boot certificate update process on Windows devices.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue?logo=powershell)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey?logo=windows)
@@ -34,6 +34,8 @@ Instead of manually querying the registry, WMI, BIOS, and Event Viewer, CheckCA2
 > ⚠️ **Scope of this tool**
 > CheckCA2023 monitors the **Registry Key deployment method** — one of several methods documented by Microsoft for deploying the CA 2023 Secure Boot certificate updates. Other deployment methods (Group Policy Objects, Microsoft Intune, WinCS APIs) are not covered by this tool.
 > For the full list of available deployment methods, refer to: [Secure Boot Certificate Updates — Guidance for IT Professionals](https://support.microsoft.com/en-us/topic/secure-boot-certificate-updates-guidance-for-it-professionals-and-organizations-e2b43f9f-b424-42df-bc6a-8476db65ab2f)
+
+![CheckCA2023 Interface](images/App.png)
 
 ---
 
@@ -124,6 +126,18 @@ Launch the script as Administrator. The GUI will open and automatically read the
 
 Use the **Check / Refresh** button to update the displayed values at any time — especially useful while the Secure Boot update scheduled task is running in the background.
 
+The interface also provides three action buttons to assist with the deployment process:
+
+![Action Buttons](images/Buttons.png)
+
+| Button | Action |
+|---|---|
+| **SET AvailableUpdates to 0x5944** | Sets the `AvailableUpdates` registry key to `0x5944` to initiate the certificate deployment |
+| **Start "Secure-Boot-Update" Task** | Triggers the `\Microsoft\Windows\PI\Secure-Boot-Update` scheduled task immediately |
+| **Create/Append logs to CSV** | Saves a snapshot of the current registry values and Event Viewer entries to `Log_CheckCA2023.csv` |
+
+> ⚠️ **Administrator privileges are required** to use these action buttons.
+
 The interface displays all relevant data organized by category (see [What It Checks](#what-it-checks) below).
 
 ---
@@ -140,6 +154,7 @@ CheckCA2023 consolidates data from multiple system sources:
 | **Secure Boot DBDefault** | Default/factory certificate database (via UEFIv2) |
 | **Registry** | Update progress (`AvailableUpdates`), status (`UEFICA2023Status`), capability (`WindowsUEFICA2023Capable`) |
 | **Event Viewer** | Secure Boot DB and DBX variable update events |
+| **CSV Log** | Snapshot export of registry values and Event Viewer entries at any point in time |
 
 ---
 
@@ -176,7 +191,7 @@ CheckCA2023 consolidates data from multiple system sources:
 
 ## Update Process Summary
 
-> This section is provided for reference. CheckCA2023 **monitors** this process — it does not trigger it automatically.
+> This section is provided for reference. Since **v1.1.0**, CheckCA2023 includes action buttons to trigger these steps directly from the GUI — see [Usage](#usage).
 
 To manually initiate the Secure Boot certificate update (IT-managed deployment):
 
@@ -250,4 +265,4 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 ---
 
-*CheckCA2023 v1.0.0 — Helping IT professionals navigate the Microsoft CA 2023 Secure Boot certificate transition.*
+*CheckCA2023 v1.1.0 — Helping IT professionals navigate the Microsoft CA 2023 Secure Boot certificate transition.*

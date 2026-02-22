@@ -1,4 +1,5 @@
-﻿
+﻿#Requires -Version 5.1
+
 #Requires -Version 5.1
 <#
 .SYNOPSIS
@@ -52,9 +53,9 @@ Add-Type -AssemblyName WindowsBase
     <Window.Resources>
         <Style x:Key="ConfirmBoxButton" TargetType="{x:Type Button}">
             <Setter Property="Background"      Value="White" />
-            <Setter Property="FontSize"        Value="14" />
-            <Setter Property="Width"           Value="95"/>
-            <Setter Property="Height"          Value="32"/>
+            <Setter Property="FontSize"        Value="16" />
+            <Setter Property="Width"           Value="80"/>
+            <Setter Property="Height"          Value="50"/>
             <Setter Property="BorderBrush"     Value="Black"/>
             <Setter Property="BorderThickness" Value="2"/>
             <Setter Property="FontWeight"      Value="Bold"/>
@@ -69,15 +70,61 @@ Add-Type -AssemblyName WindowsBase
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" 
+                                  Opacity="0.3" 
+                                  BlurRadius="4" 
+                                  ShadowDepth="2" 
+                                  Direction="315"/>
+                </Setter.Value>
+            </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background"  Value="#443E8DDD" />
+                    <Setter Property="Background"  Value="#FFCAE3FC" />
                     <Setter Property="BorderBrush" Value="Black" />
                     <Setter Property="Foreground"  Value="Black" />
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
                     <Setter Property="Background"  Value="#FF3E8DDD" />
                     <Setter Property="BorderBrush" Value="#FF3E8DDD" />
+                    <Setter Property="Foreground"  Value="White" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Styles pour les boutons -->
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="5,0,0,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border CornerRadius="1" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" >
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" 
+                                  Opacity="0.3" 
+                                  BlurRadius="4" 
+                                  ShadowDepth="2" 
+                                  Direction="315"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background"  Value="#FFCAE3FC" />
+                    <Setter Property="Foreground"  Value="Black" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background"  Value="#FF3E8DDD" />
                     <Setter Property="Foreground"  Value="White" />
                 </Trigger>
             </Style.Triggers>
@@ -106,37 +153,6 @@ Add-Type -AssemblyName WindowsBase
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
         </Style>
-
-        <!-- Styles pour les boutons -->
-        <Style x:Key="ButtonStyle" TargetType="Button">
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="#0078D4"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#005A9E"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <!-- Style pour le bouton Fermer -->
-        <Style x:Key="CloseButtonStyle" TargetType="Button">
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="#6C757D"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#5A6268"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
         <!-- Style pour les TextBox -->
         <Style x:Key="TextBoxStyle" TargetType="TextBox">
             <Setter Property="Padding" Value="5"/>
@@ -156,7 +172,7 @@ Add-Type -AssemblyName WindowsBase
         </Grid.RowDefinitions>
 
         <!-- Info - Model - Buttons -->
-        <StackPanel Grid.Row="0" HorizontalAlignment="Left" Margin="10,10,0,0" >
+        <WrapPanel Grid.Row="0" HorizontalAlignment="Left" Margin="10,10,0,0" Orientation="Horizontal"  >
             <Border BorderThickness="1" BorderBrush="Gray" Background="#66D0D0D0" CornerRadius="5">
                 <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="240" Margin="5,2,0,0" >
                     <TextBox x:Name="WinVer" FontWeight="SemiBold" Margin="0,0,0,3" Text="Windows 11 Pro 24H2"
@@ -173,10 +189,7 @@ Add-Type -AssemblyName WindowsBase
                     <TextBlock x:Name="tbSecureBoot"    FontSize="14" Margin="0,-4,0,0" Width="30" />
                 </WrapPanel>
             </Border>
-        </StackPanel>
-        <StackPanel Grid.Row="0" HorizontalAlignment="Left" Margin="270,10,0,0" >
-            <Border BorderThickness="1" BorderBrush="Gray" Background="#66D0D0D0" CornerRadius="5">
-
+            <Border BorderThickness="1" BorderBrush="Gray" Background="#66D0D0D0" CornerRadius="5" Margin="10,0,0,0">
                 <Grid Margin="5,0,0,4.5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70"/>
@@ -212,15 +225,14 @@ Add-Type -AssemblyName WindowsBase
 
                 </Grid>
             </Border>
-        </StackPanel>
-        <StackPanel Grid.Row="0" 
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Right">
-            <Button x:Name="btnExecute" Content="Check" FontWeight="SemiBold" 
-                    Style="{StaticResource ConfirmBoxButton}" Margin="0,5,30,5" />
-            <Button x:Name="btnClose" Content="Close" 
-                    Style="{StaticResource ConfirmBoxButton}" Margin="0,5,66,5"/>
-        </StackPanel>
+            <Button x:Name="btnExecute" Content="Check" Style="{StaticResource ConfirmBoxButton}" Margin="15,0,0,0" />
+            <WrapPanel Orientation="Vertical" Width="190" Margin="20,0,00,0">
+                <Button x:Name="Set_Reg_0x5944" Content="SET AvailableUpdates to 0x5944"             Margin="0,0,0,3" Width="190" Height="18" FontWeight="SemiBold" Style="{StaticResource ButtonStyle}"  />
+                <Button x:Name="Start_Task"     Content="Start &quot;Secure-Boot-Update&quot; Task"  Margin="0,0,0,3" Width="190" Height="18" FontWeight="SemiBold" Style="{StaticResource ButtonStyle}"  />
+                <Button x:Name="Log_CSV"       Content="Create/Append logs to CSV"                  Margin="0,0,0,0" Width="190" Height="18" FontWeight="SemiBold" Style="{StaticResource ButtonStyle}"  />
+            </WrapPanel>
+        </WrapPanel>
+
 
 
 
@@ -365,29 +377,72 @@ Add-Type -AssemblyName WindowsBase
                 <TextBlock x:Name="Event_Icon"      Text=""         FontSize="12" FontWeight="SemiBold" Width="30"  Foreground="#FF324873" Margin="0,0,0,0" TextAlignment="Center"/>
                 <TextBlock x:Name="Event_Message"   Text="Message"  FontSize="12" FontWeight="SemiBold" Width="500" Foreground="#FF324873" TextAlignment="Left" />
             </WrapPanel>
-            <WrapPanel Orientation="Horizontal" Margin="10,0,0,0"   Width="727"   x:Name="WrapPanel_ErrorEvent" Visibility="Visible">
+            <WrapPanel Orientation="Horizontal" Margin="10,0,0,0"   Width="727"   x:Name="WrapPanel_ErrorEvent" Visibility="Collapsed">
                 <TextBlock x:Name="Error_Num"       Text=""         FontSize="12" FontWeight="SemiBold" Width="60"  Foreground="Black"  Margin="0,0,0,0" TextAlignment="Center"/>
                 <TextBlock x:Name="Error_Status"    Text=""         FontSize="12" FontWeight="SemiBold" Width="50"  Foreground="Black"  Margin="0,0,0,0" TextAlignment="Right"/>
                 <TextBlock x:Name="Error_Icon"      Text=""         FontSize="12" FontWeight="SemiBold" Width="30"  Foreground="Black"  Margin="0,0,0,0" TextAlignment="Center"/>
                 <TextBlock x:Name="Error_Message"   Text=""         FontSize="11" FontWeight="Normal"   Width="578" Foreground="Black"  TextAlignment="Left" TextWrapping="Wrap" />
             </WrapPanel>
-            <WrapPanel Orientation="Horizontal" Margin="10,0,0,0"   Width="727" >
-                <TextBlock x:Name="_1808_Num"       Text="1808"     FontSize="12" FontWeight="SemiBold" Width="60"  Foreground="Black"  Margin="0,0,0,0" TextAlignment="Center"/>
-                <TextBlock x:Name="_1808_Status"    Text=""         FontSize="12" FontWeight="SemiBold" Width="50"  Foreground="Black"  Margin="0,0,0,0" TextAlignment="Right"/>
-                <TextBlock x:Name="_1808_Icon"      Text=""         FontSize="12" FontWeight="SemiBold" Width="30"  Foreground="Black"  Margin="0,0,0,0" TextAlignment="Center"/>
-                <TextBlock x:Name="_1808_Message"   Text=""         FontSize="12" FontWeight="SemiBold" Width="578" Foreground="Black"  TextAlignment="Left" TextWrapping="Wrap" />
+            <WrapPanel Orientation="Horizontal" Margin="10,0,0,0"       Width="727" >
+                <TextBlock x:Name="_1808_Num"       Text="1808"         FontSize="12" FontWeight="SemiBold" Width="60"  Foreground="Black"  Margin="0,0,0,0" TextAlignment="Center"/>
+                <TextBlock x:Name="_1808_Status"    Text="???         " FontSize="12" FontWeight="SemiBold" Width="50"  Foreground="Black"  Margin="0,0,0,0" TextAlignment="Right"/>
+                <TextBlock x:Name="_1808_Icon"      Text=""             FontSize="12" FontWeight="SemiBold" Width="30"  Foreground="Black"  Margin="0,0,0,0" TextAlignment="Center"/>
+                <TextBlock x:Name="_1808_Message"   Text=""             FontSize="12" FontWeight="SemiBold" Width="578" Foreground="Black"  TextAlignment="Left" TextWrapping="Wrap" />
             </WrapPanel>
         </WrapPanel>
-        
+
         <!-- Barre de statut -->
-        <Border Grid.Row="4" x:Name="BorderStatus" Width="600" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,10,0,17" Height="40"
-                Background="#F0F0F0" CornerRadius="10" BorderBrush="#FF324873" BorderThickness="1.5" >
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Info :" FontWeight="Bold" FontSize="20" Margin="10,0,10,0" Padding="0,5,0,0" />
-                <TextBlock x:Name="TxtStatus" Text="" Foreground="#FF324873"  FontSize="20" 
-                       FontWeight="Bold" Padding="10,5,0,0" Margin="0,0,0,0" Width="509" />
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Left" Width="820">
+
+            <Border x:Name="BorderStatus" Width="500" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,10,0,17" Height="40"
+                    Background="#F0F0F0" CornerRadius="10" BorderBrush="#FF324873" BorderThickness="1.5" >
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Info :" FontWeight="Bold" FontSize="20" Margin="10,0,10,0" Padding="0,5,0,0" />
+                    <TextBlock x:Name="TxtStatus" Text="Data retrieval completed successfully" Foreground="#FF324873"  FontSize="20" 
+                           FontWeight="Bold" Padding="0,5,0,0" Margin="0,0,0,0" Width="400" />
+                </StackPanel>
+            </Border>
+
+            <StackPanel x:Name="Cmd_Button" Grid.Row="4" Orientation="Horizontal"   VerticalAlignment="Bottom" Margin="60,0,0,10" Background="Transparent"  >
+                <Border Background="#1A2B4A" Width="225" Height="55" Margin="0,0,0,0" CornerRadius="8" >
+                    <Canvas Width="220" Height="55">
+
+                        <!-- Shield -->
+                        <Path Data="M25,6 L43,12 L43,26 C43,36 35,44 25,48 C15,44 7,36 7,26 L7,12 Z"
+              Fill="#2E86DE" Stroke="#5BA3F5" StrokeThickness="3"/>
+
+                        <!-- Checkmark -->
+                        <Polyline Points="24,21 34,32 50,15"
+                  Fill="Transparent" Stroke="#01D210" StrokeThickness="6"
+                  StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                  StrokeLineJoin="Round"/>
+
+                        <!-- Check -->
+                        <TextBlock Canvas.Left="60" Canvas.Top="1"
+                   Text="Check" FontFamily="Segoe UI" FontSize="20"
+                   FontWeight="Bold" Foreground="White"/>
+                        <!-- CA -->
+                        <TextBlock Canvas.Left="119" Canvas.Top="1"
+                   Text="CA" FontFamily="Segoe UI" FontSize="20"
+                   FontWeight="Bold" Foreground="#2E86DE"/>
+                        <!-- 2023 -->
+                        <TextBlock Canvas.Left="146" Canvas.Top="1"
+                   Text="2023" FontFamily="Segoe UI" FontSize="20"
+                   FontWeight="Bold" Foreground="#5BA3F5"/>
+                        <!-- Subtitle -->
+                        <TextBlock Canvas.Left="61" Canvas.Top="26"
+                   Text="UEFI Certificate Monitor" FontFamily="Segoe UI"
+                   FontSize="9" Foreground="#8AAFD4"/>
+                        <!-- Version -->
+                        <TextBlock Canvas.Left="61" Canvas.Top="38"
+                   Text="Version : 1.1.0" FontFamily="Segoe UI"
+                   FontSize="10" FontWeight="Bold" Foreground="#8AAFD4"/>
+                    </Canvas>
+                </Border>
+
             </StackPanel>
-        </Border>
+        </StackPanel>
     </Grid>
 </Window>
 
@@ -420,7 +475,9 @@ function Get-XamlControl {
 
 #region Retrieve required controls
 $btnExecute     = Get-XamlControl -Name "btnExecute"
-$btnClose       = Get-XamlControl -Name "btnClose"
+$Set_Reg_0x5944 = Get-XamlControl -Name "Set_Reg_0x5944"
+$Start_Task     = Get-XamlControl -Name "Start_Task"
+$Log_CSV        = Get-XamlControl -Name "Log_CSV"
 
 $PK_Grid         = Get-XamlControl -Name "PK_Grid"
 $PKDefault_Grid  = Get-XamlControl -Name "PKDefault_Grid"
@@ -1071,10 +1128,70 @@ if ($btnExecute) {
     })
 }
 
-# Close button
-if ($btnClose) {
-    $btnClose.Add_Click({
-        $window.Close()
+# Set AvailableUpdates to 0x5944
+if ($Set_Reg_0x5944) {
+    $Set_Reg_0x5944.Add_Click({
+        try {
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot" `
+                             -Name "AvailableUpdates" `
+                             -Value 0x5944 `
+                             -Type DWord -Force
+            Update-StatusLabel -Message "AvailableUpdates set to 0x5944" -Color "Green"
+        }
+        catch {
+            Update-StatusLabel -Message "Error setting AvailableUpdates : $_" -Color "Red"
+        }
+    })
+}
+
+# Start Task "\Microsoft\Windows\PI\Secure-Boot-Update"
+if ($Start_Task) {
+    $Start_Task.Add_Click({
+        try {
+            Start-ScheduledTask -TaskName "\Microsoft\Windows\PI\Secure-Boot-Update"
+            Update-StatusLabel -Message "Task started successfully" -Color "Green"
+        }
+        catch {
+            Update-StatusLabel -Message "Error starting task : $_" -Color "Red"
+        }
+    })
+}
+
+# Create or Append log in CSV format with current data (one line per click)
+if ($Log_CSV) {
+    $Log_CSV.Add_Click({
+        try {
+            $csvPath = Join-Path -Path $PSScriptRoot -ChildPath "Log_CheckCA2023.csv"
+
+            # Nettoyer SystemFamily : supprimer "Think" si présent
+            $systemFamilyClean = $SystemFamily.Text -replace "ThinkPad", "" -replace "ThinkCentre", "" -replace "ThinkStation", "" -replace "ThinkBook", "" -replace "^\s+|\s+$", ""
+
+            # Construire la ligne de données
+            $row = [PSCustomObject]@{
+                "Machine Type"             = $MachineType.Text
+                "System Family"            = $systemFamilyClean
+                "Bios Version"             = $BiosVer.Text
+                "Bios Date"                = $BiosDate.Text
+                "AvailableUpdates"         = $Reg1_HexValue.Text
+                "UEFICA2023Status"         = $Reg2_Value.Text
+                "WindowsUEFICA2023Capable" = $Reg3_HexValue.Text
+                "UEFICA2023ErrorEvent"     = $Reg4_DecValue.Text
+                "1808 Event"               = $_1808_Status.Text
+                "Date/Time"                = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+            }
+
+            # Créer ou ajouter au CSV
+            if (Test-Path $csvPath) {
+                $row | Export-Csv -Path $csvPath -Append -NoTypeInformation -Encoding UTF8 -Delimiter ";"
+            } else {
+                $row | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8 -Delimiter ";"
+            }
+
+            Update-StatusLabel -Message "Log saved : $csvPath" -Color "Green"
+        }
+        catch {
+            Update-StatusLabel -Message "Error saving log : $_" -Color "Red"
+        }
     })
 }
 
