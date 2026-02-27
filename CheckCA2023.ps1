@@ -190,14 +190,14 @@ Add-Type -AssemblyName WindowsBase
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- LEFT — Column 0 Row 0 - UEFI Certificat 2023 : -->
+            <!-- LEFT — Column 0 Row 0 - UEFI Certificate 2023 : -->
             <Grid Grid.Row="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="UEFI Certificat 2023 :" Background="#FF3E8DDD" FontSize="18" FontWeight="SemiBold"
+                <TextBlock Grid.Row="0" Text="UEFI Certificate 2023 :" Background="#FF3E8DDD" FontSize="18" FontWeight="SemiBold"
                     Foreground="White" Height="26" Width="715" Padding="10,0,0,0" HorizontalAlignment="Left"/>
 
                 <ScrollViewer Grid.Row="1" Width="715" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -589,7 +589,7 @@ Add-Type -AssemblyName WindowsBase
 
             <!-- RIGHT — Column 1 Row 2 - Action / Buttons -->
             <WrapPanel Grid.Row="2" Margin="0,15,0,0"  >
-                <TextBlock Text="Commande : " Background="#FF3E8DDD" FontSize="18" FontWeight="SemiBold"
+                <TextBlock Text="Command : " Background="#FF3E8DDD" FontSize="18" FontWeight="SemiBold"
                        Foreground="White" Height="26" Width="240" Padding="10,0,0,0" HorizontalAlignment="Left"/>
                 <Button x:Name="btnExecute" Content="Check" Style="{StaticResource ConfirmBoxButton}" Margin="10,10,0,15" />
 
@@ -942,7 +942,7 @@ function Get-UEFICertificates {
 
         if ($certs.Count -eq 0) {
             $GridControl.ItemsSource = @([PSCustomObject]@{ CN = "No X509 certificate found in '$DatabaseName'"; O = "" })
-            return $false
+            return $True
         }
 
         # Build grid data with tooltip content
