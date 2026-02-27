@@ -6,6 +6,38 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.2.0] - 2026-02-27
+
+### Highlights
+
+**No external module required anymore.**
+CheckCA2023 now reads all UEFI Secure Boot certificate databases natively, without any third-party dependency.
+The UEFIv2 module is no longer needed and does not need to be installed.
+
+### Added
+
+- **Native UEFI certificate reading** — UEFI Secure Boot certificate databases are now read natively using a built-in EFI Signature List (ESL) binary parser. Only X.509 certificates are displayed.
+- **DBX and DBXDefault stores** — the Forbidden Signature databases are now displayed in the GUI alongside PK, KEK, DB and their Default counterparts.
+- **Tooltip on certificate CN** — hovering over a Common Name in any certificate grid displays a tooltip with the issuer (BN), country and state, and the certificate validity period.
+- **ConfidenceLevel full description** — hovering over the `ConfidenceLevel` value displays the complete description, giving administrators immediate context without having to look up Microsoft documentation.
+- **Windows Build version check** — the GUI now evaluates the current Windows build against the minimum required build for each supported version (Win10 21H2/22H2, Win11 22H2/23H2/24H2/25H2). A visual indicator shows whether the build meets the requirement.
+- **Windows Build version in CSV log** — the build number is now included in each CSV log entry for better fleet tracking.
+- **Event ID monitoring (1799, 1801, 1802, 1803)** — the Event Viewer section now tracks these additional TPM-WMI events if present, displaying the date and message of their last occurrence in the event log.
+
+### Changed
+
+- Certificate grids now display enriched data with tooltip support. The CN column uses a template cell to support tooltip binding.
+
+### Requirements
+
+- Windows 10 22H2 or later (build released on or after October 14, 2025)
+- Secure Boot enabled
+- PowerShell 5.1 or later
+- ~~UEFIv2 PowerShell module~~ — **no longer required**
+- Administrator privileges
+
+---
+
 ## [1.1.0] - 2026-02-22
 
 ### Added
