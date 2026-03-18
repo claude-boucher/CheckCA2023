@@ -40,7 +40,7 @@ Click **MORE** to reveal additional diagnostic panels, including a bit-level bre
 
 > ✅ Successfully tested on <img src="images/ThinkPad_Logo.png" alt="ThinkPad" height="38"/>‎ ‎ ‎  <img src="images/ThinkCentre_Logo.png" alt="ThinkCentre" height="38"/>‎ ‎ ‎  <img src="images/ThinkStation_Logo.png" alt="ThinkStation" height="38"/>
 
-![CheckCA2023 Interface](images/Main_1.3.0_less.png)
+![CheckCA2023 Interface](images/Main_1.3.0_Less.png)
 
 ---
 
@@ -135,7 +135,7 @@ The **Configuration** panel now also displays the **BitLocker** protection statu
 
 Click the **MORE** button to expand the interface and reveal two additional diagnostic panels.
 
-![CheckCA2023 Interface - More](images/Main_1.3.0_more.png)
+![CheckCA2023 Interface - More](images/Main_1.3.0_More.png)
 
 ### AvailableUpdates details
 
