@@ -117,8 +117,7 @@ Use the **Check / Refresh** button to update the displayed values at any time â€
 
 The interface provides three action buttons to assist with the deployment process:
 
-<img src="images/Button_1.3.0.png" alt="ThinkPad" height="250"/>
-
+<img src="images/Button_1.3.0.png" alt="New_Button_1.3.0" height="250"/>
 
 | Button | Action |
 |---|---|
@@ -130,9 +129,7 @@ The interface provides three action buttons to assist with the deployment proces
 
 The **Configuration** panel now also displays the **BitLocker** protection status of the system drive, including the active key protector type (TPM, TPM+PIN, Password) â€” giving administrators immediate visibility into the encryption state before triggering any Secure Boot update.
 
-<img src="images/BitLocker_1.3.0.png" alt="ThinkPad" height="250"/>
-
----
+<img src="images/BitLocker_1.3.0.png" alt="BitLocker_1.3.0" height="200"/>
 
 ## "One More Thing..."
 
