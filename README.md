@@ -38,7 +38,7 @@ Click **MORE** to reveal additional diagnostic panels, including a bit-level bre
 > CheckCA2023 monitors the **Registry Key deployment method** — one of several methods documented by Microsoft for deploying the CA 2023 Secure Boot certificate updates. Other deployment methods (Group Policy Objects, Microsoft Intune, WinCS APIs) are not covered by this tool.
 > For the full list of available deployment methods, refer to: [Secure Boot Certificate Updates — Guidance for IT Professionals](https://support.microsoft.com/en-us/topic/secure-boot-certificate-updates-guidance-for-it-professionals-and-organizations-e2b43f9f-b424-42df-bc6a-8476db65ab2f)
 
-> ✅ Successfully tested on <img src="images/logo_thinkpad.png" alt="ThinkPad" height="24"/> <img src="images/logo_thinkcentre.png" alt="ThinkCentre" height="24"/> <img src="images/logo_thinkstation.png" alt="ThinkStation" height="24"/>
+> ✅ Successfully tested on <img src="images/ThinkPad_Logo.png" alt="ThinkPad" height="38"/>‎ ‎ ‎  <img src="images/ThinkCentre_Logo.png" alt="ThinkCentre" height="38"/>‎ ‎ ‎  <img src="images/ThinkStation_Logo.png" alt="ThinkStation" height="38"/>
 
 ![CheckCA2023 Interface](images/Main_1.3.0_less.png)
 
@@ -117,7 +117,8 @@ Use the **Check / Refresh** button to update the displayed values at any time �
 
 The interface provides three action buttons to assist with the deployment process:
 
-![Action Buttons](images/Button_1.3.0.png)
+<img src="images/Button_1.3.0.png" alt="ThinkPad" height="250"/>
+
 
 | Button | Action |
 |---|---|
@@ -129,7 +130,7 @@ The interface provides three action buttons to assist with the deployment proces
 
 The **Configuration** panel now also displays the **BitLocker** protection status of the system drive, including the active key protector type (TPM, TPM+PIN, Password) — giving administrators immediate visibility into the encryption state before triggering any Secure Boot update.
 
-![CheckCA2023 Interface](images/Main_1.3.0_less.png)
+<img src="images/BitLocker_1.3.0.png" alt="ThinkPad" height="250"/>
 
 ---
 
