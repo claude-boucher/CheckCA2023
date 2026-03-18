@@ -6,6 +6,37 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.3.0] - 2026-03-18
+
+### Highlights
+
+**One more thing...** — Click MORE to reveal two new diagnostic panels: a detailed breakdown of the `AvailableUpdates` bit flags, and bootloader certificate information for `bootmgfw.efi`.
+
+### Added
+
+- **BitLocker status** — the Configuration panel now displays the BitLocker protection status of the system drive, including the active key protector type (TPM, TPM+PIN, Password). A visual indicator (✔/✘) provides immediate visibility into the encryption state.
+
+- **AvailableUpdates details panel** *(visible after clicking MORE)* — a new bit-level breakdown of the `AvailableUpdates` registry value, displaying all 13 individual bit flags (0x0002 → 0x4000) with their hex value, sequence order, and designation. Each row includes a detailed tooltip explaining the exact operation performed by that bit. Rows are color-coded dynamically: gray when inactive, black when scheduled, green when completed since the last refresh.
+
+- **Bootloader certificates panel** *(visible after clicking MORE)* — displays the signing certificate, thumbprint, and file version of `bootmgfw.efi` from two locations: the system volume (`C:\Windows\Boot\EFI\`) and the EFI System Partition (`\EFI\Microsoft\Boot\`). Certificate authority is color-coded: green for CA 2023, default color for PCA 2011. The full thumbprint is available via tooltip. Reading is performed by parsing the embedded PKCS#7 signature directly from the PE binary — no external dependency required.
+
+- **Last refresh timestamp** *(visible after clicking MORE)* — displays the date and time of the last data refresh.
+
+### Changed
+
+- **SET AvailableUpdates button** replaced by a ComboBox + SET button — all known `AvailableUpdates` values from the lookup table are available for selection, allowing administrators to test individual update stages rather than being limited to `0x5944`.
+
+---
+
+## [1.2.1] - 2026-03-01
+
+### Fixed
+
+- Fixed display issue when DBX or DBXDefault store is empty — the grid now correctly reports the absence of X.509 certificates instead of throwing an error.
+- Minor typo corrections in registry value descriptions.
+
+---
+
 ## [1.2.0] - 2026-02-27
 
 ### Highlights

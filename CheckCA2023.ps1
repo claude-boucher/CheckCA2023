@@ -1,6 +1,4 @@
 ﻿#Requires -Version 5.1
-
-#Requires -Version 5.1
 <#
 .SYNOPSIS
     Application CheckCA2023 with XAML interface to read all the datas involved 
@@ -27,12 +25,12 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 # Hide PowerShell window (optional) - Associated with the above code to run as admin, can be uncommented if you want to hide the console window when running the script via double-click.
 # Note that if you run the script from an already elevated PowerShell prompt, the console will remain visible.
- $consoleWindow = (Get-Process -Id $PID).MainWindowHandle
- if ($consoleWindow -ne 0) {
-     Add-Type -Name Win -Namespace Console -MemberDefinition '
-     [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);'
-     [Console.Win]::ShowWindow($consoleWindow, 0)
- }
+# $consoleWindow = (Get-Process -Id $PID).MainWindowHandle
+# if ($consoleWindow -ne 0) {
+#     Add-Type -Name Win -Namespace Console -MemberDefinition '
+#     [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);'
+#     [Console.Win]::ShowWindow($consoleWindow, 0)
+# }
 
 # Enable strict mode - uncommented for development to catch potential issues.
 # Can be left commented in production for better resilience to minor issues in the code.
@@ -42,15 +40,17 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
+Add-Type -AssemblyName System.Security
 #endregion
 
-#region XAML
-[xml]$xaml = @"
+#region Loading XAML
+try {
+    [xml]$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="CheckCA2023" WindowStartupLocation="CenterScreen" Background="#FFE4EAF0"
         Width="1000" MinWidth="1000" MaxWidth="1000" 
-        MinHeight="670" MaxHeight="770" >
+        MinHeight="680" MaxHeight="770" >
 
     <Window.Resources>
         <Style x:Key="ConfirmBoxButton" TargetType="{x:Type Button}">
@@ -106,7 +106,7 @@ Add-Type -AssemblyName WindowsBase
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
                         <Border CornerRadius="3" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" >
-                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" />
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -162,6 +162,76 @@ Add-Type -AssemblyName WindowsBase
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
+
+        <!-- ═══ STYLE TOOLTIP ═══ -->
+        <Style x:Key="BitToolTipStyle" TargetType="ToolTip">
+            <Setter Property="Background"      Value="#FFFEF3CD"/>
+            <Setter Property="BorderBrush"     Value="#FFD4A017"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding"         Value="8,6,8,6"/>
+            <Setter Property="MaxWidth"        Value="280"/>
+            <Setter Property="HasDropShadow"   Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="6"
+                        Padding="8,6,8,6">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ═══ STYLES DE BASE ═══ -->
+        <Style x:Key="BitCellStyle" TargetType="TextBlock">
+            <Setter Property="FontSize"          Value="10"/>
+            <Setter Property="FontFamily"        Value="Segoe UI"/>
+            <Setter Property="Foreground"        Value="#6C7086"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="BitHexStyle" TargetType="TextBlock" BasedOn="{StaticResource BitCellStyle}">
+            <Setter Property="FontSize"          Value="11"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+        </Style>
+        <Style x:Key="BitHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize"          Value="10"/>
+            <Setter Property="FontFamily"        Value="Segoe UI"/>
+            <Setter Property="FontWeight"        Value="Bold"/>
+            <Setter Property="Background"        Value="#443E8DDD"/>
+            <Setter Property="Foreground"        Value="#FF3E8DDD"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- ═══ STYLES PAR COLONNE — DONNÉES ═══ -->
+        <Style x:Key="ColBitStyle" TargetType="TextBlock" BasedOn="{StaticResource BitHexStyle}">
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="ColOrdStyle" TargetType="TextBlock" BasedOn="{StaticResource BitHexStyle}">
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="ColDesignationStyle" TargetType="TextBlock" BasedOn="{StaticResource BitCellStyle}">
+            <Setter Property="TextAlignment" Value="Left"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="ToolTipService.InitialShowDelay" Value="100"/>
+        </Style>
+
+        <!-- ═══ STYLES PAR COLONNE — HEADER ═══ -->
+        <Style x:Key="ColHeaderBitStyle" TargetType="TextBlock" BasedOn="{StaticResource BitHeaderStyle}">
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="ColHeaderOrdStyle" TargetType="TextBlock" BasedOn="{StaticResource BitHeaderStyle}">
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="ColHeaderDesignationStyle" TargetType="TextBlock" BasedOn="{StaticResource BitHeaderStyle}">
+            <Setter Property="TextAlignment" Value="Left"/>
+        </Style>
+
     </Window.Resources>
 
     <!-- Conteneur principal avec marges -->
@@ -170,7 +240,7 @@ Add-Type -AssemblyName WindowsBase
             <!-- Colonne gauche : prend l'espace disponible -->
             <ColumnDefinition Width="715"/>
             <!-- Colonne droite : largeur fixe -->
-            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="530"/>
         </Grid.ColumnDefinitions>
 
         <!-- ═══════════════════════════════════════════
@@ -364,8 +434,8 @@ Add-Type -AssemblyName WindowsBase
                         </StackPanel>
 
                     </WrapPanel>
-                    
-                    
+
+
                 </ScrollViewer>
             </Grid>
 
@@ -484,19 +554,23 @@ Add-Type -AssemblyName WindowsBase
 
 
         <!-- ═══════════════════════════════════════════
-             RIGHT COLUMN
+             COLUMN 2
              3 rangées à hauteur fixe ou auto selon contenu
         ═══════════════════════════════════════════ -->
         <Grid Grid.Column="1" Margin="9,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="270"/>
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="55" />
                 <RowDefinition Height="*" MinHeight="200" />
                 <RowDefinition Height="*" MinHeight="220" />
-                <RowDefinition Height="*" MaxHeight="140" />
+                <RowDefinition Height="*" MaxHeight="110" />
             </Grid.RowDefinitions>
 
-            <!-- RIGHT — Column 1 Row 0 - Logo -->
-            <Border Grid.Row="0" Background="#1A2B4A" Width="225" Margin="0,0,0,0" CornerRadius="8" >
+            <!-- Mid — Row 0 Column 0 - Logo -->
+            <Border Grid.Row="0" Grid.Column="0" Background="#1A2B4A" Width="225" Margin="0,0,0,0" CornerRadius="8" >
                 <Canvas Width="220" Height="55" >
                     <!-- Shield -->
                     <Path Data="M25,6 L43,12 L43,26 C43,36 35,44 25,48 C15,44 7,36 7,26 L7,12 Z"
@@ -517,14 +591,12 @@ Add-Type -AssemblyName WindowsBase
                     <TextBlock Canvas.Left="61" Canvas.Top="26" Text="UEFI Certificate Monitor" FontFamily="Segoe UI"
                         FontSize="9" Foreground="#8AAFD4" />
                     <!-- Version -->
-                    <TextBlock Canvas.Left="61" Canvas.Top="38" Text="Version : 1.2.0" FontFamily="Segoe UI"
+                    <TextBlock Canvas.Left="61" Canvas.Top="38" Text="Version : 1.3.0" FontFamily="Segoe UI"
                         FontSize="10" FontWeight="Bold" Foreground="#8AAFD4" />
                 </Canvas>
             </Border>
-
-            <!-- RIGHT — Column 1 Row 1 - OS / Config -->
-
-            <WrapPanel Grid.Row="1" Margin="0,15,0,0" >
+            <!-- Mid — Row 1 Column 0 - Configuration -->
+            <WrapPanel Grid.Row="1" Grid.Column="0" Margin="0,15,0,0" >
                 <TextBlock Text="Configuration : " Background="#FF3E8DDD" FontSize="18" FontWeight="SemiBold"
                        Foreground="White" Height="26" Width="240" Padding="10,0,0,0" HorizontalAlignment="Left"/>
                 <Border Width="240" BorderThickness="1.5" BorderBrush="Gray" Background="#66D0D0D0" CornerRadius="0" Margin="0,5,0,0">
@@ -532,18 +604,32 @@ Add-Type -AssemblyName WindowsBase
                         <TextBox x:Name="WinVer" Width="230" FontWeight="SemiBold" Margin="-3,2,0,2" Text="Windows 11 Pro 24H2"
                                 FontSize="12" Padding="0,0,0,0" IsReadOnly="True" BorderThickness="0"
                                 Background="Transparent" IsTabStop="False" />
-                        <TextBlock FontWeight="SemiBold" Text="Build : " Margin="2,0,0,0" FontSize="12" Padding="0,4,0,4" />
-                        <TextBox x:Name="WinBuild" FontWeight="SemiBold" Text="xxxx.yyyy" HorizontalContentAlignment="Center"
-                                FontSize="12" IsReadOnly="True" BorderThickness="0.5" Background="#EEE" IsTabStop="False"
-                                Margin="0,0,2,2" Padding="2,0,2,0" Height="18" />
-                        <TextBlock x:Name="IcoBuild"    Text="✔" FontSize="14" Margin="0,0,5,0" Width="20" />
-                        <TextBlock x:Name="MinBuildTxt" Text="Minimum Build" FontWeight="SemiBold" FontSize="12"
-                                   Background="Transparent" Foreground="DarkRed" Margin="0,0,0,0" Height="18" Padding="0,4,0,0" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Left">
+                            <TextBlock FontWeight="SemiBold" Text="Build : " Margin="2,0,0,0" FontSize="12" Padding="0,4,0,4" />
+                            <TextBox x:Name="WinBuild" FontWeight="SemiBold" Text="xxxx.yyyy" HorizontalContentAlignment="Center"
+                                    FontSize="12" IsReadOnly="True" BorderThickness="0.5" Background="#EEE" IsTabStop="False"
+                                    Margin="0,0,2,2" Padding="2,0,2,0" Height="18" />                            
+                            <TextBlock x:Name="IcoBuild"    Text="✔" FontSize="14" Margin="0,0,5,0" Width="20" />
+                            <TextBlock x:Name="MinBuildTxt" Text="Minimum Build" FontWeight="SemiBold" FontSize="12"
+                                       Background="Transparent" Foreground="DarkRed" Margin="0,0,0,0" Height="18" Padding="0,4,0,0" />
+                        </StackPanel>
 
-                        <TextBlock Text="Secure Boot : "              FontSize="12" Margin="2,0,0,2"  FontWeight="SemiBold" />
-                        <TextBlock x:Name="tbSecureBoot"    Text="✔" FontSize="14" Margin="0,-4,0,2" Width="20" />
-                        <TextBlock x:Name="MinBuildValue" Text="26100.6060" FontWeight="SemiBold" FontSize="12"
-                                   Background="Transparent" Foreground="DarkRed" Margin="48,0,0,0" Height="18" Padding="0,0,0,0" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Left">
+                            <TextBlock Text="Secure Boot : " Width="75" FontSize="12" Margin="2,0,0,2"  FontWeight="SemiBold" TextAlignment="Right" />
+                            <TextBlock x:Name="tbSecureBoot"    Text="✔" FontSize="14" Margin="0,-4,0,2" Width="20" />
+                            <TextBlock x:Name="MinBuildValue" Text="26100.6060" FontWeight="SemiBold" FontSize="12"
+                                       Background="Transparent" Foreground="DarkRed" Margin="48,0,0,0" Height="18" Padding="0,0,0,0" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,0" HorizontalAlignment="Left">
+                            <TextBlock Text="BitLocker : " Width="75" FontSize="12" Margin="2,0,0,2"
+                                    FontWeight="SemiBold" TextAlignment="Right" />
+                            <TextBlock x:Name="BitLockerIcon" Width="16" FontSize="14" Margin="2,-5,0,2"
+                                        FontWeight="SemiBold" TextAlignment="Center" />
+                            <TextBlock x:Name="BitLockerStatus" Width="110" FontSize="12" Margin="10,0,0,2"
+                                        FontWeight="SemiBold" TextAlignment="Left" />
+                        </StackPanel>
+
                         <Border Width="200" BorderThickness="0,1.5,0,0" BorderBrush="Gray" Margin="15,3,0,3" />
 
                         <Grid Margin="0,0,0,0"  >
@@ -586,42 +672,384 @@ Add-Type -AssemblyName WindowsBase
                 </Border>
 
             </WrapPanel>
-
-            <!-- RIGHT — Column 1 Row 2 - Action / Buttons -->
-            <WrapPanel Grid.Row="2" Margin="0,15,0,0"  >
+            <!-- Mid — Row 2 Column 0 - Command -->
+            <WrapPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,0"  >
                 <TextBlock Text="Command : " Background="#FF3E8DDD" FontSize="18" FontWeight="SemiBold"
                        Foreground="White" Height="26" Width="240" Padding="10,0,0,0" HorizontalAlignment="Left"/>
                 <Button x:Name="btnExecute" Content="Check" Style="{StaticResource ConfirmBoxButton}" Margin="10,10,0,15" />
+                <Button x:Name="btnMore" Content="MORE" Style="{StaticResource ButtonStyle}" Margin="15,24,0,15"
+                        FontWeight="Bold" FontSize="14" Width="55" Height="36" />
 
-                <Button x:Name="Set_Reg_0x5944" Content="SET AvailableUpdates to 0x5944"
-                        Margin="10,0,0,10" Width="210" Height="24" FontWeight="SemiBold" Style="{StaticResource ButtonStyle}"  />
+                <Button x:Name="Set_Reg_To"     Content="▼  Set AvailableUpdates to  ▼"
+                        Margin="10,0,0,3" Width="210" Height="24" FontWeight="SemiBold" FontSize="13" Style="{StaticResource ButtonStyle}"  />
+
+                <ComboBox x:Name="Set_Reg_ComboBox" Width="210" Height="24" Margin="10,0,0,10"
+                            FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"/>
+
                 <Button x:Name="Start_Task"     Content="Start &quot;Secure-Boot-Update&quot; Task"
-                        Margin="10,0,0,10" Width="210" Height="24" FontWeight="SemiBold" Style="{StaticResource ButtonStyle}"  />
+                        Margin="10,0,0,10" Width="210" Height="24" FontWeight="SemiBold" FontSize="13" Style="{StaticResource ButtonStyle}"  />
                 <Button x:Name="Log_CSV"       Content="Create/Append logs to CSV"
-                        Margin="10,0,0,0" Width="210" Height="24" FontWeight="SemiBold" Style="{StaticResource ButtonStyle}"  />
+                        Margin="10,0,0,0" Width="210" Height="24" FontWeight="SemiBold" FontSize="13" Style="{StaticResource ButtonStyle}"  />
             </WrapPanel>
-
-
-
-
-            <!-- RIGHT — Column 1 Row 3 - Status -->
-
-            <Border Grid.Row="3" x:Name="BorderStatus" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,30,0,0" Width="230"
-                    Background="#F0F0F0" CornerRadius="12" BorderBrush="#FF324873" BorderThickness="2" Height="100" >
-                <StackPanel Orientation="Vertical" MinHeight="90" >
-                    <Border Grid.Row="3" x:Name="BorderTitleStatus" Margin="15,-13,100,0" Background="#FF324873" CornerRadius="12" BorderBrush="#FF324873" BorderThickness="0" >
-                        <TextBlock x:Name="TitleStatus" Text="Status :" Foreground="#F0F0F0" FontWeight="Bold" FontSize="20" Margin="0,-3,0,0" Width="90" Padding="0,0,0,1" />
+            <!-- Mid — Row 3 Column 0 - Status -->
+            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" x:Name="BorderStatus" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="5,0,0,0" Width="235" 
+                    Background="#F0F0F0" CornerRadius="12" BorderBrush="#FF324873" BorderThickness="2" Height="90" >
+                <StackPanel Orientation="Vertical" Margin="0,0,-17,0" >
+                    <Border Grid.Row="3" x:Name="BorderTitleStatus"     Width="120" Margin="15,-13,0,0" HorizontalAlignment="Left" Background="#FF324873" CornerRadius="12" BorderBrush="#FF324873" BorderThickness="0" >
+                        <TextBlock x:Name="TitleStatus" Text="Status :" Width="90" Foreground="#F0F0F0" FontWeight="Bold" FontSize="20" Margin="0,-3,0,0" Padding="0,0,0,1" />
                     </Border>
                     <TextBlock x:Name="TxtStatus" Text="Data retrieval completed successfully" Foreground="#FF324873"  FontSize="16" 
                            FontWeight="Bold" Padding="0,3,0,0" Margin="5,0,5,0" TextWrapping="Wrap"  />
                 </StackPanel>
             </Border>
+
+
+            <!-- ══════ COLUMN 2 ═══════════════════════════════════════════ -->
+
+            <!-- More —  Row 3 Column 0 - Status -->
+            <WrapPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Margin="5,1,0,0" >
+                <TextBlock Text="AvailableUpdates details : " Background="#FF3E8DDD" FontSize="16" FontWeight="SemiBold"
+                       Foreground="White" Height="26" Width="255" Padding="10,2,0,0" HorizontalAlignment="Left"/>
+                <StackPanel  Orientation="Vertical" Margin="0,5,0,0" Width="255" >
+
+                    <Grid x:Name="GridBits">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="45"/>
+                            <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="16"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- ═══ HEADER ═══ -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Bit"         Style="{StaticResource ColHeaderBitStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="#"           Style="{StaticResource ColHeaderOrdStyle}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Designation" Style="{StaticResource ColHeaderDesignationStyle}"/>
+
+                        <!-- ═══ 0x0002 ═══ -->
+                        <TextBlock x:Name="Bit0002_Hex"  Grid.Row="1" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0002"/>
+                        <TextBlock x:Name="Bit0002_Ord"  Grid.Row="1" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text=""/>
+                        <TextBlock x:Name="Bit0002_Name" Grid.Row="1" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="DBX update (apply latest revocations)">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="DBX update (apply latest revocations)" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Applies the latest DBX revocations to the Secure Boot forbidden signatures database." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0004 ═══ -->
+                        <TextBlock x:Name="Bit0004_Hex"  Grid.Row="2" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0004"/>
+                        <TextBlock x:Name="Bit0004_Ord"  Grid.Row="2" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text="4"/>
+                        <TextBlock x:Name="Bit0004_Name" Grid.Row="2" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="Microsoft Corp. KEK 2K CA 2023 update">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Microsoft Corp. KEK 2K CA 2023 update" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Adds the Microsoft Corporation KEK 2K CA 2023 to the KEK store. Requires an OEM-signed KEK, delivered via cumulative updates and validated against the device's Platform Key (PK) managed by the OEM." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0008 ═══ -->
+                        <TextBlock x:Name="Bit0008_Hex"  Grid.Row="3" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0008"/>
+                        <TextBlock x:Name="Bit0008_Ord"  Grid.Row="3" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text=""/>
+                        <TextBlock x:Name="Bit0008_Name" Grid.Row="3" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="Unknown">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Unknown" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Undocumented bit." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0010 ═══ -->
+                        <TextBlock x:Name="Bit0010_Hex"  Grid.Row="4" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0010"/>
+                        <TextBlock x:Name="Bit0010_Ord"  Grid.Row="4" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text=""/>
+                        <TextBlock x:Name="Bit0010_Name" Grid.Row="4" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="Unknown">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Unknown" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Undocumented bit." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0020 ═══ -->
+                        <TextBlock x:Name="Bit0020_Hex"  Grid.Row="5" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0020"/>
+                        <TextBlock x:Name="Bit0020_Ord"  Grid.Row="5" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text=""/>
+                        <TextBlock x:Name="Bit0020_Name" Grid.Row="5" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="SkuSiPolicy update (VBS anti-rollback)">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="SkuSiPolicy update" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Applies the Microsoft-signed revocation policy (SkuSiPolicy.p7b) for VBS (Virtualization-based Security) anti-rollback protection." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0040 ═══ -->
+                        <TextBlock x:Name="Bit0040_Hex"  Grid.Row="6" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0040"/>
+                        <TextBlock x:Name="Bit0040_Ord"  Grid.Row="6" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text="1"/>
+                        <TextBlock x:Name="Bit0040_Name" Grid.Row="6" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="Windows UEFI CA 2023 &#x2192; DB">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Windows UEFI CA 2023 &#x2192; DB" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Adds the Windows UEFI CA 2023 certificate to the Secure Boot DB, allowing Windows to trust boot managers signed by this certificate." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0080 ═══ -->
+                        <TextBlock x:Name="Bit0080_Hex"  Grid.Row="7" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0080"/>
+                        <TextBlock x:Name="Bit0080_Ord"  Grid.Row="7" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text=""/>
+                        <TextBlock x:Name="Bit0080_Name" Grid.Row="7" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="Windows Production PCA 2011 &#x2192; DBX">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Windows Production PCA 2011 &#x2192; DBX" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Adds the Microsoft Windows Production PCA 2011 certificate to the DBX, revoking trust in the older boot manager signing chain." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0100 ═══ -->
+                        <TextBlock x:Name="Bit0100_Hex"  Grid.Row="8" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0100"/>
+                        <TextBlock x:Name="Bit0100_Ord"  Grid.Row="8" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text="5"/>
+                        <TextBlock x:Name="Bit0100_Name" Grid.Row="8" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="Apply boot manager with UEFI CA 2023">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Apply boot manager with UEFI CA 2023" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Replaces the current boot manager (signed by Windows PCA 2011) with a new one signed by Windows UEFI CA 2023." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0200 ═══ -->
+                        <TextBlock x:Name="Bit0200_Hex"  Grid.Row="9" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0200"/>
+                        <TextBlock x:Name="Bit0200_Ord"  Grid.Row="9" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text=""/>
+                        <TextBlock x:Name="Bit0200_Name" Grid.Row="9" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="SVN firmware update">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="SVN firmware update" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Increments the Secure Version Number (SVN) in counter in UEFI/Secure Boot firmware, preventing rollback to older boot managers." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0400 ═══ -->
+                        <TextBlock x:Name="Bit0400_Hex"  Grid.Row="10" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0400"/>
+                        <TextBlock x:Name="Bit0400_Ord"  Grid.Row="10" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text=""/>
+                        <TextBlock x:Name="Bit0400_Name" Grid.Row="10" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="SBAT firmware update">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="SBAT firmware update" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Applies a Secure Boot Advanced Targeting (SBAT) update to UEFI/Linux firmware, enabling metadata-based revocation of vulnerable bootloaders." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x0800 ═══ -->
+                        <TextBlock x:Name="Bit0800_Hex"  Grid.Row="11" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x0800"/>
+                        <TextBlock x:Name="Bit0800_Ord"  Grid.Row="11" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text="2"/>
+                        <TextBlock x:Name="Bit0800_Name" Grid.Row="11" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="MS Option ROM UEFI CA 2023 &#x2192; DB">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Microsoft Option ROM UEFI CA 2023 &#x2192; DB" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Adds the Microsoft Option ROM UEFI CA 2023 to the DB. If 0x4000 is set, only applied when UEFI CA 2011 is already present in DB." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x1000 ═══ -->
+                        <TextBlock x:Name="Bit1000_Hex"  Grid.Row="12" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x1000"/>
+                        <TextBlock x:Name="Bit1000_Ord"  Grid.Row="12" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text="3"/>
+                        <TextBlock x:Name="Bit1000_Name" Grid.Row="12" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="MS UEFI CA 2023 &#x2192; DB">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Microsoft UEFI CA 2023 &#x2192; DB" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Adds the Microsoft UEFI CA 2023 to the DB. If 0x4000 is set, only applied when UEFI CA 2011 is already present in DB." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                        <!-- ═══ 0x4000 ═══ -->
+                        <TextBlock x:Name="Bit4000_Hex"  Grid.Row="13" Grid.Column="0" Style="{StaticResource ColBitStyle}"         Text="0x4000"/>
+                        <TextBlock x:Name="Bit4000_Ord"  Grid.Row="13" Grid.Column="1" Style="{StaticResource ColOrdStyle}"         Text="2+3"/>
+                        <TextBlock x:Name="Bit4000_Name" Grid.Row="13" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                   Text="Conditional CA 2023 application">
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Conditional CA 2023 application" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Modifies bits 0x0800 and 0x1000: CA 2023 certificates are only added if Microsoft Corporation UEFI CA 2011 is already present in the DB, preserving the device's existing security profile." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+
+                        <!-- ═══ Total_Hex ═══ -->
+                        <Border Grid.Row="14" Grid.Column="0" Margin="0,1,0,0"
+                                BorderBrush="Black" BorderThickness="0,1,0,0" />
+                        <TextBlock x:Name="Total_Hex"   Grid.Row="14" Grid.Column="0" Style="{StaticResource ColBitStyle}"
+                                   Text=""        Foreground="Black" FontSize="13" FontWeight="Bold"   />
+                        <TextBlock x:Name="Total_Ord"   Grid.Row="14" Grid.Column="1" Style="{StaticResource ColOrdStyle}"
+                                   Text=":"             Foreground="Black" FontSize="13" FontWeight="Bold"  />
+                        <TextBlock x:Name="Total_Name"  Grid.Row="14" Grid.Column="2" Style="{StaticResource ColDesignationStyle}"
+                                   Text="Actual State (Sum)"  Foreground="Black" FontSize="12" FontWeight="Bold"  >
+                            <TextBlock.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="ACTUAL STATE (Sum)" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Sum of flags set - Typical start value is 0x5944 with all relevant bits set. Progression: 0x5944 → 0x5904 → 0x5104 → 0x4104 → 0x4100 → 0x4000." FontSize="10" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+
+                    </Grid>
+
+                </StackPanel>
+
+                <WrapPanel Height="120" Width="265" Margin="0,25,0,0">
+                    
+                    
+                </WrapPanel>
+            </WrapPanel>
+
+
+            <WrapPanel Grid.Row="2" Grid.Column="1" Margin="5,0,0,0" >
+                <TextBlock Text="Bootloader certificates : " Background="#FF3E8DDD" FontSize="16" FontWeight="SemiBold"
+                       Foreground="White" Height="26" Width="255" Padding="10,2,0,0" HorizontalAlignment="Left"/>
+                <StackPanel x:Name="BootLoadCert" Orientation="Vertical" Margin="5,5,0,0" Width="255">
+                    <!-- ── Système ─────────────────────────────────────────── -->
+                    <Border Background="#443E8DDD" CornerRadius="5" Margin="0,0,0,2" Width="245" HorizontalAlignment="Left">
+                        <TextBlock Text="Système  C:\Windows\Boot\EFI\bootmgfw.efi" 
+                   FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"
+                   Margin="5,2,4,2"/>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="14,1,0,0">
+                        <TextBlock Text="Certificat : " 
+                   FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootSysLabel" Text="..." FontWeight="Bold"
+                   FontSize="11" Foreground="#FF324873"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="14,1,0,0">
+                        <TextBlock Text="Thumbprint : " 
+                   FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootSysThumb" Text="..."
+                   FontSize="10" Foreground="#FF324873"
+                   ToolTip="{Binding ElementName=TxtBootSysThumb, Path=Tag}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="14,1,0,4">
+                        <TextBlock Text="Version : " 
+                   FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootSysVersion" Text="..."
+                   FontSize="10" Foreground="#FF324873" TextWrapping="Wrap" Width="140"/>
+                    </StackPanel>
+                    <!-- ── ESP ─────────────────────────────────────────────── -->
+                    <Border Background="#443E8DDD" CornerRadius="5" Margin="0,2,0,2" Width="245" HorizontalAlignment="Left">
+                        <TextBlock Text="ESP  \EFI\Microsoft\Boot\bootmgfw.efi" 
+                   FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"
+                   Margin="5,2,4,2"/>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="14,1,0,0">
+                        <TextBlock Text="Certificat : " 
+                   FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootEspLabel" Text="..." FontWeight="Bold"
+                   FontSize="11" Foreground="#FF324873"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="14,1,0,0">
+                        <TextBlock Text="Thumbprint : " 
+                   FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootEspThumb" Text="..."
+                   FontSize="10" Foreground="#FF324873"
+                   ToolTip="{Binding ElementName=TxtBootEspThumb, Path=Tag}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="14,1,0,4">
+                        <TextBlock Text="Version : " 
+                   FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootEspVersion" Text="..."
+                   FontSize="10" Foreground="#FF324873" TextWrapping="Wrap" Width="140"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Border Grid.Row="3" Grid.Column="1" Margin="20,5,0,0" Padding="4,0" 
+                        Background="#FFFEF3CD" BorderBrush="#FFD4A017" BorderThickness="2"
+                        CornerRadius="5" HorizontalAlignment="Left" Width="230" Height="26"  >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Last refresh : " FontSize="14" FontWeight="SemiBold" Foreground="#FFAC9149"/>
+                        <TextBlock x:Name="TxtLastRefresh" Text="—" FontSize="14" Foreground="#FFAC9149"/>
+                    </StackPanel>
+                </Border>
+
+
+
+
+            </WrapPanel>
+            
+            
         </Grid>
     </Grid>
 </Window>
 "@
-$reader = New-Object System.Xml.XmlNodeReader $xaml
-$window = [Windows.Markup.XamlReader]::Load($reader)
+    $reader = New-Object System.Xml.XmlNodeReader $xaml
+    $window = [Windows.Markup.XamlReader]::Load($reader)
+}
+catch {
+    Write-Error "Error loading XAML: $_"
+    exit 1
+}
 #endregion
 
 #region Helper function to retrieve XAML controls
@@ -646,8 +1074,20 @@ function Get-XamlControl {
 #endregion
 
 #region Retrieve required controls
+#$colExtra = Get-XamlControl -Name "ColExtra"
+
+$colExtraActions = $window.FindName("ColExtraActions")
+
 $btnExecute     = Get-XamlControl -Name "btnExecute"
-$Set_Reg_0x5944 = Get-XamlControl -Name "Set_Reg_0x5944"
+$btnMore        = Get-XamlControl -Name "btnMore"
+
+$BitLockerStatus = Get-XamlControl -Name "BitLockerStatus"
+$BitLockerIcon   = Get-XamlControl -Name "BitLockerIcon"
+$BitLockerStatus = Get-XamlControl -Name "BitLockerStatus"
+
+$Set_Reg_To        = Get-XamlControl -Name "Set_Reg_To"
+$Set_Reg_ComboBox  = Get-XamlControl -Name "Set_Reg_ComboBox"
+
 $Start_Task     = Get-XamlControl -Name "Start_Task"
 $Log_CSV        = Get-XamlControl -Name "Log_CSV"
 
@@ -676,6 +1116,18 @@ $SystemFamily   = Get-XamlControl -Name "SystemFamily"
 $MachineType    = Get-XamlControl -Name "MachineType"
 $BiosVer        = Get-XamlControl -Name "BiosVer"
 $BiosDate       = Get-XamlControl -Name "BiosDate"
+
+$script:EspDriveLetter = "S"
+$TxtBootSysLabel  = Get-XamlControl -Name "TxtBootSysLabel"
+$TxtBootSysThumb  = Get-XamlControl -Name "TxtBootSysThumb"
+$TxtBootSysVersion = Get-XamlControl -Name "TxtBootSysVersion"
+
+$TxtBootEspLabel  = Get-XamlControl -Name "TxtBootEspLabel"
+$TxtBootEspThumb  = Get-XamlControl -Name "TxtBootEspThumb"
+$TxtBootEspVersion = Get-XamlControl -Name "TxtBootEspVersion"
+
+$TxtLastRefresh = Get-XamlControl -Name "TxtLastRefresh"
+
 #endregion
 
 function Get-SecureBootState {
@@ -1016,14 +1468,26 @@ function Update-StatusLabel {
 
 #region Lookup table - AvailableUpdates
 $AvailableUpdates_Table = [ordered]@{
-    "0x0000" = "No Secure Boot key update are performed"
-    "0x4000" = "Applied the Windows UEFI CA 2023 signed boot manager"
-    "0x4004" = "A PK signed KEK, from the OEM isn't available."
-    "0x4100" = "Applied the Microsoft Corporation KEK 2K CA 2023"
-    "0x4104" = "Applied the Microsoft UEFI CA 2023 if needed"
-    "0x5104" = "Applied the Microsoft Option ROM UEFI CA 2023 if needed"
-    "0x5904" = "Applied the Windows UEFI CA 2023 successfully"
-    "0x5944" = "Start - Deploy all needed certificates and update to the PCA2023 signed boot manager"
+    # Séquence de progression Microsoft
+    "0x0000" = "No Secure Boot key updates are scheduled"
+    "0x4004" = "Pending: KEK update — OEM-signed KEK not yet available"
+    "0x4100" = "Pending: Boot manager update — KEK 2K CA 2023 applied"
+    "0x4104" = "Pending: Option ROM CA 2023 — Microsoft UEFI CA 2023 applied"
+    "0x5104" = "Pending: Microsoft UEFI CA 2023 — Option ROM CA 2023 applied"
+    "0x5904" = "Pending: DB/KEK/BootMgr updates — Windows UEFI CA 2023 applied"
+    "0x5944" = "Pending: DB, KEK, Boot Manager and CA 2023 updates"
+    # Bits individuels (valeurs intermédiaires possibles)
+    "0x0002" = "Pending: DBX revocation update"
+    "0x0004" = "Pending: Add Microsoft Corporation KEK 2K CA 2023 to KEK"
+    "0x0020" = "Pending: SkuSiPolicy revocation policy update"
+    "0x0040" = "Pending: Add Windows UEFI CA 2023 to DB"
+    "0x0080" = "Pending: Add Windows Production PCA 2011 to DBX"
+    "0x0100" = "Pending: Apply PCA2023-signed boot manager"
+    "0x0200" = "Pending: SVN (Secure Version Number) firmware update"
+    "0x0400" = "Pending: SBAT (Secure Boot Advanced Targeting) firmware update"
+    "0x0800" = "Pending: Add Microsoft Option ROM UEFI CA 2023 to DB"
+    "0x1000" = "Pending: Add Microsoft UEFI CA 2023 to DB"
+    "0x4000" = "Pending: Conditional CA 2023 application (guard bit)"
 }
 #endregion
 
@@ -1083,6 +1547,7 @@ function Get-RegistryValue {
         [Parameter(Mandatory=$true)]  [System.Windows.Controls.TextBlock]$HexControl,
         [Parameter(Mandatory=$true)]  [System.Windows.Controls.TextBlock]$DescControl,
         [Parameter(Mandatory=$false)] [System.Windows.Controls.TextBlock]$IconControl = $null,
+        [Parameter(Mandatory=$false)] [System.Windows.Controls.TextBlock]$ExtraHexControl = $null,
         [Parameter(Mandatory=$false)] [string]$GoodValue = "",
         [Parameter(Mandatory=$false)] [string]$DefaultDesc = ""
     )
@@ -1094,6 +1559,12 @@ function Get-RegistryValue {
 
         $HexControl.Text       = $hexValue
         $HexControl.Foreground = "Black"
+
+         # Optionally mirror the hex value to a second control (e.g. Total_Hex in GridBits)
+        if ($null -ne $ExtraHexControl) {
+            $ExtraHexControl.Text       = $hexValue
+            $ExtraHexControl.Foreground = "Black"
+        }
 
         if ($LookupTable.Contains($hexValue)) {
             $DescControl.Text       = $LookupTable[$hexValue]
@@ -1250,6 +1721,123 @@ $_1803_Status     = Get-XamlControl -Name "_1803_Status"
 $_1803_Message    = Get-XamlControl -Name "_1803_Message"
 $WrapPanel_1803   = Get-XamlControl -Name "WrapPanel_1803"
 #endregion
+
+#region Retrieve Registry controls
+$Total_Hex    = Get-XamlControl -Name "Total_Hex"
+
+$Bit0002_Hex  = Get-XamlControl -Name "Bit0002_Hex"
+$Bit0002_Ord  = Get-XamlControl -Name "Bit0002_Ord"
+$Bit0002_Name = Get-XamlControl -Name "Bit0002_Name"
+
+$Bit0004_Hex  = Get-XamlControl -Name "Bit0004_Hex"
+$Bit0004_Ord  = Get-XamlControl -Name "Bit0004_Ord"
+$Bit0004_Name = Get-XamlControl -Name "Bit0004_Name"
+
+$Bit0008_Hex  = Get-XamlControl -Name "Bit0008_Hex"
+$Bit0008_Ord  = Get-XamlControl -Name "Bit0008_Ord"
+$Bit0008_Name = Get-XamlControl -Name "Bit0008_Name"
+
+$Bit0010_Hex  = Get-XamlControl -Name "Bit0010_Hex"
+$Bit0010_Ord  = Get-XamlControl -Name "Bit0010_Ord"
+$Bit0010_Name = Get-XamlControl -Name "Bit0010_Name"
+
+$Bit0020_Hex  = Get-XamlControl -Name "Bit0020_Hex"
+$Bit0020_Ord  = Get-XamlControl -Name "Bit0020_Ord"
+$Bit0020_Name = Get-XamlControl -Name "Bit0020_Name"
+
+$Bit0040_Hex  = Get-XamlControl -Name "Bit0040_Hex"
+$Bit0040_Ord  = Get-XamlControl -Name "Bit0040_Ord"
+$Bit0040_Name = Get-XamlControl -Name "Bit0040_Name"
+
+$Bit0080_Hex  = Get-XamlControl -Name "Bit0080_Hex"
+$Bit0080_Ord  = Get-XamlControl -Name "Bit0080_Ord"
+$Bit0080_Name = Get-XamlControl -Name "Bit0080_Name"
+
+$Bit0100_Hex  = Get-XamlControl -Name "Bit0100_Hex"
+$Bit0100_Ord  = Get-XamlControl -Name "Bit0100_Ord"
+$Bit0100_Name = Get-XamlControl -Name "Bit0100_Name"
+
+$Bit0200_Hex  = Get-XamlControl -Name "Bit0200_Hex"
+$Bit0200_Ord  = Get-XamlControl -Name "Bit0200_Ord"
+$Bit0200_Name = Get-XamlControl -Name "Bit0200_Name"
+
+$Bit0400_Hex  = Get-XamlControl -Name "Bit0400_Hex"
+$Bit0400_Ord  = Get-XamlControl -Name "Bit0400_Ord"
+$Bit0400_Name = Get-XamlControl -Name "Bit0400_Name"
+
+$Bit0800_Hex  = Get-XamlControl -Name "Bit0800_Hex"
+$Bit0800_Ord  = Get-XamlControl -Name "Bit0800_Ord"
+$Bit0800_Name = Get-XamlControl -Name "Bit0800_Name"
+
+$Bit1000_Hex  = Get-XamlControl -Name "Bit1000_Hex"
+$Bit1000_Ord  = Get-XamlControl -Name "Bit1000_Ord"
+$Bit1000_Name = Get-XamlControl -Name "Bit1000_Name"
+
+$Bit4000_Hex  = Get-XamlControl -Name "Bit4000_Hex"
+$Bit4000_Ord  = Get-XamlControl -Name "Bit4000_Ord"
+$Bit4000_Name = Get-XamlControl -Name "Bit4000_Name"
+
+$Total_Ord    = Get-XamlControl -Name "Total_Ord"
+$Total_Name   = Get-XamlControl -Name "Total_Name"
+#endregion
+
+# Mémorise la valeur d'AvailableUpdates avant le dernier refresh
+$script:PreviousAvailableUpdates = $null
+
+#region Function to color the GridBits rows based on AvailableUpdates value
+function Update-BitColors {
+
+    $ColorInactive  = [System.Windows.Media.Brushes]::Gray    # absent, non planifié
+    $ColorScheduled = [System.Windows.Media.Brushes]::Black   # présent, planifié
+    $ColorDone      = [System.Windows.Media.Brushes]::Green   # traité depuis dernier refresh
+
+    if ([string]::IsNullOrEmpty($Total_Hex.Text) -or $Total_Hex.Text -eq "N/A") { return }
+    $current  = [Convert]::ToInt32($Total_Hex.Text.Replace("0x",""), 16)
+    $previous = $script:PreviousAvailableUpdates
+
+    $BitMap = @(
+        @{ Bit = 0x0002; Controls = @($Bit0002_Hex, $Bit0002_Ord, $Bit0002_Name) },
+        @{ Bit = 0x0004; Controls = @($Bit0004_Hex, $Bit0004_Ord, $Bit0004_Name) },
+        @{ Bit = 0x0008; Controls = @($Bit0008_Hex, $Bit0008_Ord, $Bit0008_Name) },
+        @{ Bit = 0x0010; Controls = @($Bit0010_Hex, $Bit0010_Ord, $Bit0010_Name) },
+        @{ Bit = 0x0020; Controls = @($Bit0020_Hex, $Bit0020_Ord, $Bit0020_Name) },
+        @{ Bit = 0x0040; Controls = @($Bit0040_Hex, $Bit0040_Ord, $Bit0040_Name) },
+        @{ Bit = 0x0080; Controls = @($Bit0080_Hex, $Bit0080_Ord, $Bit0080_Name) },
+        @{ Bit = 0x0100; Controls = @($Bit0100_Hex, $Bit0100_Ord, $Bit0100_Name) },
+        @{ Bit = 0x0200; Controls = @($Bit0200_Hex, $Bit0200_Ord, $Bit0200_Name) },
+        @{ Bit = 0x0400; Controls = @($Bit0400_Hex, $Bit0400_Ord, $Bit0400_Name) },
+        @{ Bit = 0x0800; Controls = @($Bit0800_Hex, $Bit0800_Ord, $Bit0800_Name) },
+        @{ Bit = 0x1000; Controls = @($Bit1000_Hex, $Bit1000_Ord, $Bit1000_Name) },
+        @{ Bit = 0x4000; Controls = @($Bit4000_Hex, $Bit4000_Ord, $Bit4000_Name) }
+    )
+
+    foreach ($entry in $BitMap) {
+        $bit      = $entry.Bit
+        $controls = $entry.Controls
+
+        $isActive  = ($current  -band $bit) -ne 0
+        $wasActive = ($null -ne $previous) -and (($previous -band $bit) -ne 0)
+
+        if ($isActive) {
+            $color = $ColorScheduled   # planifié
+        } elseif ($wasActive) {
+            $color = $ColorDone        # réalisé depuis le dernier refresh
+        } else {
+            $color = $ColorInactive    # inactif
+        }
+
+        foreach ($ctrl in $controls) {
+            if ($null -ne $ctrl) { $ctrl.Foreground = $color }
+        }
+    }
+
+    # Ligne Total toujours en noir
+    foreach ($ctrl in @($Total_Hex, $Total_Ord, $Total_Name)) {
+        if ($null -ne $ctrl) { $ctrl.Foreground = [System.Windows.Media.Brushes]::Black }
+    }
+}
+#endregion
+
 
 #region Function to read a REG_DWORD registry value and display its decimal value
 function Get-RegistryDWordDecimal {
@@ -1415,6 +2003,171 @@ function Get-TPMEventByID {
 }
 #endregion
 
+function Get-CertLabel ($subject) {
+    if ($null -eq $subject)                              { return $null }
+    if ($subject -match "Windows UEFI CA 2023")          { return "CA 2023" }
+    if ($subject -match "Windows Production PCA 2011")   { return "PCA 2011" }
+    return "Unknown"
+}
+
+function Read-EfiCertInfo {
+    param([string]$FilePath)
+    try {
+        if (-not (Test-Path $FilePath)) { return @{ Error = "File not found" } }
+
+        $sig = Get-AuthenticodeSignature -FilePath $FilePath
+        $fileVersion = (Get-Item -Path $FilePath).VersionInfo.FileVersion
+        if ($sig.Status -ne "Valid" -and $sig.Status -ne "UnknownError") {
+            return @{ Error = "Invalid signature : $($sig.Status)" }
+        }
+
+        # Lire le PE et extraire le PKCS#7 embarqué
+        $bytes    = [System.IO.File]::ReadAllBytes($FilePath)
+        $cms      = New-Object System.Security.Cryptography.Pkcs.SignedCms
+        
+        # Localiser le security directory dans le PE header
+        # Offset 0x3C = offset du PE header
+        $peOffset = [BitConverter]::ToInt32($bytes, 0x3C)
+        # Magic : 0x10B = PE32, 0x20B = PE32+
+        $magic    = [BitConverter]::ToUInt16($bytes, $peOffset + 24)
+        $certTableOffset = if ($magic -eq 0x20B) {
+            [BitConverter]::ToInt32($bytes, $peOffset + 168)  # PE32+
+        } else {
+            [BitConverter]::ToInt32($bytes, $peOffset + 152)  # PE32
+        }
+
+        if ($certTableOffset -eq 0) { return @{ Error = "No signature found in the executable" } }
+
+        # Structure WIN_CERTIFICATE : dwLength(4) + wRevision(2) + wCertificateType(2) + bCertificate(n)
+        $certLen  = [BitConverter]::ToInt32($bytes, $certTableOffset)
+        $certData = $bytes[($certTableOffset + 8)..($certTableOffset + $certLen - 1)]
+
+        $cms.Decode($certData)
+
+        # Parcourir tous les certificats embarqués dans le PKCS#7
+        $target = $cms.Certificates | Where-Object {
+            $_.Subject -match "UEFI CA 2023" -or
+            $_.Subject -match "PCA 2011"
+        } | Select-Object -First 1
+
+        if ($target) {
+            return @{
+                Subject    = $target.Subject
+                Thumbprint = $target.Thumbprint
+                Version    = $fileVersion
+                Error      = $null
+            }
+        }
+
+        # Fallback : retourner l'issuer du feuille
+        return @{
+            Subject    = $sig.SignerCertificate.Issuer
+            Thumbprint = $sig.SignerCertificate.Thumbprint
+            Version    = $fileVersion
+            Error      = $null
+        }
+    }
+    catch {
+        return @{ Error = "Error : $_" }
+        return @{ Error = "File not found"; Version = $null }
+        return @{ Error = "Invalid signature : ..."; Version = $null }
+        return @{ Error = "Error : $_"; Version = $null }
+    }
+}
+
+function Get-BootloaderCertInfo {
+    $result = [PSCustomObject]@{
+        System_Subject    = $null
+        System_Thumbprint = $null
+        System_Version    = $null
+        System_Error      = $null
+        ESP_Subject       = $null
+        ESP_Thumbprint    = $null
+        ESP_Version       = $null
+        ESP_Error         = $null
+    }
+
+    # ── Fichier système ───────────────────────────────────────
+    $r = Read-EfiCertInfo -FilePath "C:\Windows\Boot\EFI\bootmgfw.efi"
+    $result.System_Subject    = $r.Subject
+    $result.System_Thumbprint = $r.Thumbprint
+    $result.System_Version    = $r.Version
+    $result.System_Error      = $r.Error
+
+    # ── Fichier ESP ───────────────────────────────────────────
+    $espDrive   = "$($script:EspDriveLetter):"
+    $espMounted = $false
+    try {
+        if (Test-Path $espDrive) {
+            $result.ESP_Error = "Drive letter $espDrive already in use"
+        } else {
+            $mountOut = & mountvol $espDrive /S 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                $result.ESP_Error = "ESP not mountable"
+            } else {
+                $espMounted = $true
+                $r = Read-EfiCertInfo -FilePath "$espDrive\EFI\Microsoft\Boot\bootmgfw.efi"
+                $result.ESP_Subject    = $r.Subject
+                $result.ESP_Thumbprint = $r.Thumbprint
+                $result.ESP_Version    = $r.Version
+                $result.ESP_Error      = $r.Error
+            }
+        }
+    } catch {
+        $result.ESP_Error = "ESP read error : $_"
+    } finally {
+        if ($espMounted) { mountvol $espDrive /D | Out-Null }
+    }
+
+    return $result
+}
+
+function Get-BitLockerStatus {
+    try {
+        $bl = Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction Stop
+
+        $protectors = $bl.KeyProtector | 
+                      Where-Object { $_.KeyProtectorType -ne "RecoveryPassword" } |
+                      Select-Object -ExpandProperty KeyProtectorType
+
+        $protectorLabel = switch ($true) {
+            ($protectors -contains "TpmPin")   { "TPM+PIN" }
+            ($protectors -contains "TpmKey")   { "TPM+Key" }
+            ($protectors -contains "Tpm")      { "TPM" }
+            ($protectors -contains "Password") { "Password" }
+            default                            { "Unknown" }
+        }
+
+        switch ($bl.ProtectionStatus) {
+            "On"  {
+                $BitLockerIcon.Text       = "✔"
+                $BitLockerIcon.Foreground = "Green"
+                $BitLockerStatus.Text       = "On ($protectorLabel)"
+                $BitLockerStatus.Foreground = "Green"
+            }
+            "Off" {
+                $BitLockerIcon.Text       = "✘"
+                $BitLockerIcon.Foreground = "Gray"
+                $BitLockerStatus.Text       = "Off"
+                $BitLockerStatus.Foreground = "Gray"
+            }
+            default {
+                $BitLockerIcon.Text       = "?"
+                $BitLockerIcon.Foreground = "OrangeRed"
+                $BitLockerStatus.Text       = $bl.ProtectionStatus
+                $BitLockerStatus.Foreground = "OrangeRed"
+            }
+        }
+    }
+    catch {
+        $BitLockerIcon.Text       = "?"
+        $BitLockerIcon.Foreground = "OrangeRed"
+        $BitLockerStatus.Text       = "N/A"
+        $BitLockerStatus.Foreground = "OrangeRed"
+    }
+}
+
+
 function Invoke-MainAction {
     try {
         Update-StatusLabel -Message "Data retrieval..." -Color "Blue"
@@ -1470,11 +2223,17 @@ function Invoke-MainAction {
         }
 
         # Registry : AvailableUpdates
+        # Mémorise la valeur courante avant de la remplacer (pour comparer après le prochain refresh)
+        if (-not [string]::IsNullOrEmpty($Total_Hex.Text) -and $Total_Hex.Text -ne "N/A") {
+            $script:PreviousAvailableUpdates = [Convert]::ToInt32($Total_Hex.Text.Replace("0x",""), 16)
+        }
         Get-RegistryValue       -RegPath    "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot" `
                                 -ValueName  "AvailableUpdates" `
                                 -LookupTable $AvailableUpdates_Table `
                                 -HexControl  $Reg1_HexValue `
-                                -DescControl $Reg1_Description
+                                -DescControl $Reg1_Description `
+                                -ExtraHexControl $Total_Hex
+        Update-BitColors
 
         # Registry : UEFICA2023Status
         Get-RegistryStringValue -RegPath      "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing" `
@@ -1509,7 +2268,6 @@ function Invoke-MainAction {
                                 -ValueControl $Reg5_Value `
                                 -DescControl  $Reg5_Description
 
-
         # Event TPM-WMI : trigger only if an error is detected
         if ($script:Reg4_RawValue) {
             $WrapPanel_ErrorEvent.Visibility = [System.Windows.Visibility]::Visible
@@ -1525,11 +2283,45 @@ function Invoke-MainAction {
         # Event TPM-WMI 1808 : Secure Boot keys updated
         Get-TPMEvent1808
 
+        # Bootloader certificates (System + ESP)
+        $bootInfo = Get-BootloaderCertInfo
+
+        # Système
+        if ($bootInfo.System_Error) {
+            $TxtBootSysLabel.Text = $bootInfo.System_Error
+            $TxtBootSysThumb.Text = ""
+            $TxtBootSysThumb.Tag  = $null
+            $TxtBootSysVersion.Text = ""
+        } else {
+            $TxtBootSysLabel.Text       = Get-CertLabel $bootInfo.System_Subject
+            $TxtBootSysLabel.Foreground = if ($bootInfo.System_Subject -match "UEFI CA 2023") { "Green" } else { "#FF324873" }
+            $TxtBootSysThumb.Tag  = $bootInfo.System_Thumbprint
+            $TxtBootSysThumb.Text = $bootInfo.System_Thumbprint.Substring(0,8) + "…"
+            $TxtBootSysVersion.Text = $bootInfo.System_Version
+        }
+
+        # ESP
+        if ($bootInfo.ESP_Error) {
+            $TxtBootEspLabel.Text = $bootInfo.ESP_Error
+            $TxtBootEspThumb.Text = ""
+            $TxtBootEspThumb.Tag  = $null
+            $TxtBootEspVersion.Text = ""
+        } else {
+            $TxtBootEspLabel.Text       = Get-CertLabel $bootInfo.ESP_Subject
+            $TxtBootEspLabel.Foreground = if ($bootInfo.ESP_Subject -match "UEFI CA 2023") { "Green" } else { "#FF324873" }
+            $TxtBootEspThumb.Tag  = $bootInfo.ESP_Thumbprint
+            $TxtBootEspThumb.Text = $bootInfo.ESP_Thumbprint.Substring(0,8) + "…"
+            $TxtBootEspVersion.Text = $bootInfo.ESP_Version
+        }
+
         # Event TPM-WMI : 1799, 1801, 1802, 1803 if exists
         Get-TPMEventByID -EventID 1799 -NumControl $_1799_Num -StatusControl $_1799_Status -MessageControl $_1799_Message -WrapPanelControl $WrapPanel_1799
         Get-TPMEventByID -EventID 1801 -NumControl $_1801_Num -StatusControl $_1801_Status -MessageControl $_1801_Message -WrapPanelControl $WrapPanel_1801
         Get-TPMEventByID -EventID 1802 -NumControl $_1802_Num -StatusControl $_1802_Status -MessageControl $_1802_Message -WrapPanelControl $WrapPanel_1802
         Get-TPMEventByID -EventID 1803 -NumControl $_1803_Num -StatusControl $_1803_Status -MessageControl $_1803_Message -WrapPanelControl $WrapPanel_1803
+
+        # Last refresh timestamp
+        $TxtLastRefresh.Text = Get-Date -Format "yyyy-MM-dd  HH:mm:ss"
     }
     catch {
         Update-StatusLabel -Message "Data retrieval error" -Color "Red"
@@ -1547,15 +2339,51 @@ if ($btnExecute) {
     })
 }
 
-# Set AvailableUpdates to 0x5944
-if ($Set_Reg_0x5944) {
-    $Set_Reg_0x5944.Add_Click({
+# Execute button
+if ($btnMore) {
+    $btnMore.Add_Click({
+        if ($btnMore.Content -eq "MORE") {
+            $btnMore.Content = "LESS"
+            $window.MinWidth = 1280
+            $window.MaxWidth = 1280
+            $window.Width    = 1280
+            $BorderStatus.Width = 515
+            $BorderStatus.Height = 65
+        } elseif ($btnMore.Content -eq "LESS") {
+            $btnMore.Content = "MORE"
+            $window.MinWidth = 1000
+            $window.MaxWidth = 1000
+            $window.Width    = 1000
+            $BorderStatus.Width = 235
+            $BorderStatus.Height = 90
+        }
+    })
+}
+
+# Set AvailableUpdates to selected value
+if ($Set_Reg_To) {
+    $Set_Reg_To.Add_Click({
         try {
+            $selected = $Set_Reg_ComboBox.SelectedItem
+            if (-not $selected) {
+                Update-StatusLabel -Message "No value selected" -Color "OrangeRed"
+                return
+            }
+
+            $hexStr   = $selected.Tag
+            $rawValue = [Convert]::ToInt32($hexStr.Replace("0x",""), 16)
+
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot" `
                              -Name "AvailableUpdates" `
-                             -Value 0x5944 `
+                             -Value $rawValue `
                              -Type DWord -Force
-            Update-StatusLabel -Message "AvailableUpdates set to 0x5944" -Color "Green"
+
+            Update-StatusLabel -Message "AvailableUpdates set to $hexStr" -Color "Green"
+            $Reg1_HexValue.Text = $hexStr
+            $Total_Hex.Text     = $hexStr
+            # Mémorise la valeur de départ pour comparer après le prochain refresh
+            $script:PreviousAvailableUpdates = $rawValue
+            Update-BitColors
         }
         catch {
             Update-StatusLabel -Message "Error setting AvailableUpdates : $_" -Color "Red"
@@ -1629,6 +2457,21 @@ $window.Add_Loaded({
                     -MachineTypeControl $MachineType `
                     -BiosVersionControl $BiosVer `
                     -BiosDateControl $BiosDate
+
+    # Alimenter le ComboBox AvailableUpdates
+    foreach ($entry in $AvailableUpdates_Table.GetEnumerator()) {
+        $item = New-Object System.Windows.Controls.ComboBoxItem
+        $item.Content = "$($entry.Key)  —  $($entry.Value)"
+        $item.Tag     = $entry.Key
+        $Set_Reg_ComboBox.Items.Add($item) | Out-Null
+        }
+    # Sélectionner 0x5944 par défaut
+    $default = $Set_Reg_ComboBox.Items | Where-Object { $_.Tag -eq "0x5944" }
+    if ($default) { $Set_Reg_ComboBox.SelectedItem = $default }
+
+    # Check Bit Locker Status
+    Get-BitLockerStatus
+
 })
 
 # Window closing event
