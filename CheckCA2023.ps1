@@ -266,9 +266,14 @@ try {
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Text="UEFI Certificate 2023 :" Background="#FF3E8DDD" FontSize="18" FontWeight="SemiBold"
-                    Foreground="White" Height="26" Width="715" Padding="10,0,0,0" HorizontalAlignment="Left"/>
+                <StackPanel Orientation="Horizontal" Background="#FF3E8DDD" Height="26" Width="715">
+                    <TextBlock Text="UEFI Certificate 2023 :" FontSize="18" FontWeight="SemiBold"
+                        Foreground="White" Height="26" Padding="10,0,0,0" VerticalAlignment="Center"/>
+                    <CheckBox x:Name="ChkShowGuid" Content="Show GUID" Foreground="White" FontSize="11"
+                        VerticalAlignment="Center" Margin="20,0,0,0" IsChecked="False"/>
+</StackPanel>
+ <!--                <TextBlock Grid.Row="0" Text="UEFI Certificate 2023 :" Background="#FF3E8DDD" FontSize="18" FontWeight="SemiBold"   -->
+ <!--                  Foreground="White" Height="26" Width="715" Padding="10,0,0,0" HorizontalAlignment="Left"/>   -->
 
                 <ScrollViewer Grid.Row="1" Width="715" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <WrapPanel >
@@ -591,7 +596,7 @@ try {
                     <TextBlock Canvas.Left="61" Canvas.Top="26" Text="UEFI Certificate Monitor" FontFamily="Segoe UI"
                         FontSize="9" Foreground="#8AAFD4" />
                     <!-- Version -->
-                    <TextBlock Canvas.Left="61" Canvas.Top="38" Text="Version : 1.3.0" FontFamily="Segoe UI"
+                    <TextBlock Canvas.Left="61" Canvas.Top="38" Text="Version : 1.4.0" FontFamily="Segoe UI"
                         FontSize="10" FontWeight="Bold" Foreground="#8AAFD4" />
                 </Canvas>
             </Border>
@@ -1080,6 +1085,7 @@ $colExtraActions = $window.FindName("ColExtraActions")
 
 $btnExecute     = Get-XamlControl -Name "btnExecute"
 $btnMore        = Get-XamlControl -Name "btnMore"
+$ChkShowGuid    = Get-XamlControl -Name "ChkShowGuid"
 
 $BitLockerStatus = Get-XamlControl -Name "BitLockerStatus"
 $BitLockerIcon   = Get-XamlControl -Name "BitLockerIcon"
@@ -1351,17 +1357,18 @@ function Get-UEFICertificates {
                         try {
                             $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList @(,$sigData)
 
-                            $results.Add([pscustomobject]@{
-                                CN        = Parse-DnField -Dn $cert.Subject -Field 'CN'
-                                O         = Parse-DnField -Dn $cert.Subject -Field 'O'
-                                C         = Parse-DnField -Dn $cert.Subject -Field 'C'
-                                ST        = Parse-DnField -Dn $cert.Subject -Field 'S'
-                                IssuerCN  = Parse-DnField -Dn $cert.Issuer  -Field 'CN'
-                                IssuerS   = Parse-DnField -Dn $cert.Issuer  -Field 'S'
-                                IssuerC   = Parse-DnField -Dn $cert.Issuer  -Field 'C'
-                                NotBefore = $cert.NotBefore
-                                NotAfter  = $cert.NotAfter
-                            })
+                        $results.Add([pscustomobject]@{
+                            CN             = Parse-DnField -Dn $cert.Subject -Field 'CN'
+                            O              = Parse-DnField -Dn $cert.Subject -Field 'O'
+                            C              = Parse-DnField -Dn $cert.Subject -Field 'C'
+                            ST             = Parse-DnField -Dn $cert.Subject -Field 'S'
+                            IssuerCN       = Parse-DnField -Dn $cert.Issuer  -Field 'CN'
+                            IssuerS        = Parse-DnField -Dn $cert.Issuer  -Field 'S'
+                            IssuerC        = Parse-DnField -Dn $cert.Issuer  -Field 'C'
+                            NotBefore      = $cert.NotBefore
+                            NotAfter       = $cert.NotAfter
+                            SignatureOwner = [Guid]::new($ownerGuidBytes)
+})
                         }
                         catch {
                             # Invalid X509 data — silently ignored
@@ -1397,44 +1404,82 @@ function Get-UEFICertificates {
             return $True
         }
 
-        # Build grid data with tooltip content
-        $gridData = @()
-        foreach ($c in $certs) {
-            $cn = if ($c.CN) { $c.CN } else { "N/A" }
-            $o  = if ($c.O)  { $c.O  } else { "N/A" }
+# Constante SignatureOwner Microsoft
+$MS_OWNER_GUID = [Guid]'77fa9abd-0359-4d32-bd60-28f4e78f784b'
 
-            # Tooltip line 1 : Issuer CN (BN)
-            $ttLine1 = if ($c.IssuerCN) { $c.IssuerCN } else { "" }
+# Build grid data with tooltip content
+$gridData = @()
+foreach ($c in $certs) {
+    $cn = if ($c.CN) { $c.CN } else { "N/A" }
+    $o  = if ($c.O)  { $c.O  } else { "N/A" }
 
-            # Tooltip line 2 : C ST (empty line if both absent)
-            $ttLine2 = (($c.C, $c.ST | Where-Object { $_ -ne "" }) -join " ")
+    # Tooltip line 1 : Issuer CN (BN)
+    $ttLine1 = if ($c.IssuerCN) { $c.IssuerCN } else { "" }
 
-            # Tooltip line 3 : validity period
-            $ttLine3 = "$($c.NotBefore.ToString('yyyy-MM-dd'))  ->  $($c.NotAfter.ToString('yyyy-MM-dd'))"
+    # Tooltip line 2 : C ST (empty line if both absent)
+    $ttLine2 = (($c.C, $c.ST | Where-Object { $_ -ne "" }) -join " ")
 
-            $tooltip = "$ttLine1`n$ttLine2`n$ttLine3"
+    # Tooltip line 3 : validity period
+    $ttLine3 = "$($c.NotBefore.ToString('yyyy-MM-dd'))  ->  $($c.NotAfter.ToString('yyyy-MM-dd'))"
 
-            $rowColor = if ($cn -match '2023' -or $o -match '2023') { "Green" } else { "Black" }
+    $tooltip = "$ttLine1`n$ttLine2`n$ttLine3"
 
-            $gridData += [PSCustomObject]@{
-                CN        = $cn
-                O         = $o
-                Tooltip   = $tooltip
-                Color     = $rowColor
-            }
+    $rowColor = if ($cn -match '2023' -or $o -match '2023') { "Green" } else { "Black" }
+
+    # Ligne certificat normale
+    $gridData += [PSCustomObject]@{
+        CN        = $cn
+        O         = $o
+        Tooltip   = $tooltip
+        Color     = $rowColor
+        IsGuidRow = $false
+        GuidColor = ""
+    }
+
+    # Ligne GUID — ajoutée uniquement si checkbox cochée
+    if ($ChkShowGuid.IsChecked -and $DatabaseName -notmatch "DBX") {
+        $guidColor = if ($c.SignatureOwner -eq $MS_OWNER_GUID) { "Blue" } else { "BlueViolet" }
+        $gridData += [PSCustomObject]@{
+            CN        = "  ↳ SignatureOwner : $($c.SignatureOwner)"
+            O         = ""
+            Tooltip   = ""
+            Color     = $guidColor
+            IsGuidRow = $true
+            GuidColor = $guidColor
         }
+    }
+}
 
         $GridControl.ItemsSource = $gridData
 
         # Row style : green + bold if Color = "Green"
         $GridControl.RowStyle = $null
-        $style   = New-Object System.Windows.Style([System.Windows.Controls.DataGridRow])
-        $trigger = New-Object System.Windows.DataTrigger
-        $trigger.Binding = New-Object System.Windows.Data.Binding("Color")
-        $trigger.Value   = "Green"
-        $trigger.Setters.Add((New-Object System.Windows.Setter([System.Windows.Controls.Control]::ForegroundProperty, [System.Windows.Media.Brushes]::Green)))
-        $trigger.Setters.Add((New-Object System.Windows.Setter([System.Windows.Controls.Control]::FontWeightProperty, [System.Windows.FontWeights]::Bold)))
-        $style.Triggers.Add($trigger)
+        $style = New-Object System.Windows.Style([System.Windows.Controls.DataGridRow])
+
+        # Trigger : vert + gras si certificat 2023
+        $triggerGreen = New-Object System.Windows.DataTrigger
+        $triggerGreen.Binding = New-Object System.Windows.Data.Binding("Color")
+        $triggerGreen.Value   = "Green"
+        $triggerGreen.Setters.Add((New-Object System.Windows.Setter([System.Windows.Controls.Control]::ForegroundProperty, [System.Windows.Media.Brushes]::Green)))
+        $triggerGreen.Setters.Add((New-Object System.Windows.Setter([System.Windows.Controls.Control]::FontWeightProperty, [System.Windows.FontWeights]::Bold)))
+        $style.Triggers.Add($triggerGreen)
+
+        # Trigger : bleu si GUID Microsoft
+        $triggerBlue = New-Object System.Windows.DataTrigger
+        $triggerBlue.Binding = New-Object System.Windows.Data.Binding("Color")
+        $triggerBlue.Value   = "Blue"
+        $triggerBlue.Setters.Add((New-Object System.Windows.Setter([System.Windows.Controls.Control]::ForegroundProperty, [System.Windows.Media.Brushes]::Blue)))
+        $triggerBlue.Setters.Add((New-Object System.Windows.Setter([System.Windows.Controls.Control]::FontSizeProperty, [double]9)))
+        $style.Triggers.Add($triggerBlue)
+
+        # Trigger : violet si GUID OEM
+        $triggerViolet = New-Object System.Windows.DataTrigger
+        $triggerViolet.Binding = New-Object System.Windows.Data.Binding("Color")
+        $triggerViolet.Value   = "BlueViolet"
+        $triggerViolet.Setters.Add((New-Object System.Windows.Setter([System.Windows.Controls.Control]::ForegroundProperty, [System.Windows.Media.Brushes]::BlueViolet)))
+        $triggerViolet.Setters.Add((New-Object System.Windows.Setter([System.Windows.Controls.Control]::FontSizeProperty, [double]9)))
+        $style.Triggers.Add($triggerViolet)
+
         $GridControl.RowStyle = $style
 
         return $true
