@@ -9,8 +9,8 @@
 .NOTES
     Author  : Claude Boucher - sometools.eu
     Contact : checkca2023@sometools.eu
-    Version : 1.2.0
-    Date    : 2026-02-27
+    Version : 1.5.0
+    Date    : 2026-04-28
     License : MIT
     GitHub  : https://github.com/claude-boucher/CheckCA2023
 #>
@@ -25,12 +25,12 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 # Hide PowerShell window (optional) - Associated with the above code to run as admin, can be uncommented if you want to hide the console window when running the script via double-click.
 # Note that if you run the script from an already elevated PowerShell prompt, the console will remain visible.
-# $consoleWindow = (Get-Process -Id $PID).MainWindowHandle
-# if ($consoleWindow -ne 0) {
-#     Add-Type -Name Win -Namespace Console -MemberDefinition '
-#     [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);'
-#     [Console.Win]::ShowWindow($consoleWindow, 0)
-# }
+ $consoleWindow = (Get-Process -Id $PID).MainWindowHandle
+ if ($consoleWindow -ne 0) {
+     Add-Type -Name Win -Namespace Console -MemberDefinition '
+     [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);'
+     [Console.Win]::ShowWindow($consoleWindow, 0)
+ }
 
 # Enable strict mode - uncommented for development to catch potential issues.
 # Can be left commented in production for better resilience to minor issues in the code.
@@ -49,8 +49,8 @@ try {
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="CheckCA2023" WindowStartupLocation="CenterScreen" Background="#FFE4EAF0"
-        Width="1000" MinWidth="1000" MaxWidth="1000" 
-        MinHeight="680" MaxHeight="770" >
+        Width="1280" MinWidth="1280" MaxWidth="1280" 
+        MinHeight="700" MaxHeight="900" >
 
     <Window.Resources>
         <Style x:Key="ConfirmBoxButton" TargetType="{x:Type Button}">
@@ -570,7 +570,7 @@ try {
             <Grid.RowDefinitions>
                 <RowDefinition Height="55" />
                 <RowDefinition Height="*" MinHeight="200" />
-                <RowDefinition Height="*" MinHeight="220" />
+                <RowDefinition Height="*" MinHeight="280" />
                 <RowDefinition Height="*" MaxHeight="110" />
             </Grid.RowDefinitions>
 
@@ -596,7 +596,7 @@ try {
                     <TextBlock Canvas.Left="61" Canvas.Top="26" Text="UEFI Certificate Monitor" FontFamily="Segoe UI"
                         FontSize="9" Foreground="#8AAFD4" />
                     <!-- Version -->
-                    <TextBlock Canvas.Left="61" Canvas.Top="38" Text="Version : 1.4.0" FontFamily="Segoe UI"
+                    <TextBlock Canvas.Left="61" Canvas.Top="38" Text="Version : 1.5.0" FontFamily="Segoe UI"
                         FontSize="10" FontWeight="Bold" Foreground="#8AAFD4" />
                 </Canvas>
             </Border>
@@ -654,7 +654,7 @@ try {
                             <TextBlock x:Name="SystemFamily" Grid.Column="1" Grid.Row="0" FontSize="11"
                            Margin="5,0,0,0" Background="Transparent" FontWeight="SemiBold"/>
 
-                            <TextBlock Grid.Column="0" Grid.Row="1" Text="Machine Type :"  FontSize="11"
+                            <TextBlock Grid.Column="0" Grid.Row="1" Text="Model :"  FontSize="11"
                            Background="Transparent" HorizontalAlignment="Right" />
                             <TextBlock x:Name="MachineType" Grid.Column="1" Grid.Row="1" FontSize="11"
                            Margin="5,0,0,0" Background="Transparent" FontWeight="SemiBold"/>
@@ -682,7 +682,7 @@ try {
                 <TextBlock Text="Command : " Background="#FF3E8DDD" FontSize="18" FontWeight="SemiBold"
                        Foreground="White" Height="26" Width="240" Padding="10,0,0,0" HorizontalAlignment="Left"/>
                 <Button x:Name="btnExecute" Content="Check" Style="{StaticResource ConfirmBoxButton}" Margin="10,10,0,15" />
-                <Button x:Name="btnMore" Content="MORE" Style="{StaticResource ButtonStyle}" Margin="15,24,0,15"
+                <Button x:Name="btnMore" Content="LESS" Style="{StaticResource ButtonStyle}" Margin="15,24,0,15"
                         FontWeight="Bold" FontSize="14" Width="55" Height="36" />
 
                 <Button x:Name="Set_Reg_To"     Content="▼  Set AvailableUpdates to  ▼"
@@ -697,8 +697,8 @@ try {
                         Margin="10,0,0,0" Width="210" Height="24" FontWeight="SemiBold" FontSize="13" Style="{StaticResource ButtonStyle}"  />
             </WrapPanel>
             <!-- Mid — Row 3 Column 0 - Status -->
-            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" x:Name="BorderStatus" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="5,0,0,0" Width="235" 
-                    Background="#F0F0F0" CornerRadius="12" BorderBrush="#FF324873" BorderThickness="2" Height="90" >
+            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" x:Name="BorderStatus" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="5,0,0,0" Width="515" 
+                    Background="#F0F0F0" CornerRadius="12" BorderBrush="#FF324873" BorderThickness="2" Height="65" >
                 <StackPanel Orientation="Vertical" Margin="0,0,-17,0" >
                     <Border Grid.Row="3" x:Name="BorderTitleStatus"     Width="120" Margin="15,-13,0,0" HorizontalAlignment="Left" Background="#FF324873" CornerRadius="12" BorderBrush="#FF324873" BorderThickness="0" >
                         <TextBlock x:Name="TitleStatus" Text="Status :" Width="90" Foreground="#F0F0F0" FontWeight="Bold" FontSize="20" Margin="0,-3,0,0" Padding="0,0,0,1" />
@@ -989,6 +989,14 @@ try {
                         <TextBlock x:Name="TxtBootSysLabel" Text="..." FontWeight="Bold"
                    FontSize="11" Foreground="#FF324873"/>
                     </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Margin="14,1,0,0">
+                        <TextBlock Text="SVN : " 
+                   FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootSysSVN" Text="..." FontWeight="Bold"
+                   FontSize="11" Foreground="#FF324873"/>
+                    </StackPanel>
+
                     <StackPanel Orientation="Horizontal" Margin="14,1,0,0">
                         <TextBlock Text="Thumbprint : " 
                    FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
@@ -1008,25 +1016,104 @@ try {
                    FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"
                    Margin="5,2,4,2"/>
                     </Border>
-                    <StackPanel Orientation="Horizontal" Margin="14,1,0,0">
+
+
+                    <Grid Margin="14,2,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 0 : Certificat -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
                         <TextBlock Text="Certificat : " 
                    FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"/>
                         <TextBlock x:Name="TxtBootEspLabel" Text="..." FontWeight="Bold"
                    FontSize="11" Foreground="#FF324873"/>
                     </StackPanel>
+
+                        <!-- Row 1 : SVN -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,1,0,0">
+                            <TextBlock Text="SVN : " FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"/>
+                            <TextBlock x:Name="TxtBootEspSVN" Text="..." FontWeight="Bold" FontSize="11" Foreground="#FF324873"/>
+                    </StackPanel>
+
+                        <!-- Row 2 : Thumbprint -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,1,0,0">
+                            <TextBlock Text="Thumbprint : " FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
+                            <TextBlock x:Name="TxtBootEspThumb" Text="..." FontSize="10" Foreground="#FF324873"
+                   ToolTip="{Binding ElementName=TxtBootEspThumb, Path=Tag}"/>
+                        </StackPanel>
+
+                        <!-- Bouton : colonne droite, sur les 3 premières lignes -->
+                        <Button Grid.Row="0" Grid.RowSpan="3" Grid.Column="1"
+        x:Name="BtnRollback"
+        Style="{StaticResource ButtonStyle}"
+        Padding="4,2"
+        VerticalAlignment="Center"
+        IsEnabled="False"
+        ToolTipService.ShowOnDisabled="True"
+        ToolTipService.InitialShowDelay="100" Margin="0,0,25,0">
+                            <Button.ToolTip>
+                                <ToolTip Style="{StaticResource BitToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="Rollback to PCA 2011 Bootloader" FontWeight="Bold" FontSize="10" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Overwrites ESP bootloader with C:\Windows\Boot\EFI\bootmgfw.efi (PCA 2011)." FontSize="10" TextWrapping="Wrap"/>
+                                        <TextBlock Text="For diagnostic / test rollback only." FontSize="10" FontStyle="Italic" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Button.ToolTip>
+                            <TextBlock TextAlignment="Center" LineHeight="11" FontSize="10" Padding="8,1" >
+        Rollback to<LineBreak/>PCA 2011<LineBreak/>Bootloader
+                            </TextBlock>
+                        </Button>
+
+                        <!-- Row 3 : Version (pleine largeur sous le bouton) -->
+                        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,1,0,0">
+                            <TextBlock Text="Version : " FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
+                            <TextBlock x:Name="TxtBootEspVersion" Text="..." FontSize="10" Foreground="#FF324873" TextWrapping="Wrap" Width="140"/>
+                        </StackPanel>
+                    </Grid>
+
+
+
+                    <!--<StackPanel Orientation="Horizontal" Margin="14,2,0,0">
+                        <TextBlock Text="Certificat : " 
+                               FontSize="11" FontWeight="SemiBold" Foreground="#FF324873" Margin="0,18,0,0" />
+                        <TextBlock x:Name="TxtBootEspLabel" Text="..." FontWeight="Bold"
+                               FontSize="11" Foreground="#FF324873" Margin="0,18,0,0" />
+                        <Button x:Name="BtnRollback" HorizontalAlignment="Right"
+                                FontSize="10" Padding="4,2"
+                                IsEnabled="False"
+                                ToolTip="Overwrites ESP bootloader with C:\Windows\Boot\EFI\bootmgfw.efi (PCA 2011). For diagnostic / test rollback only."
+                                ToolTipService.ShowOnDisabled="True"  Margin="40,0,0,0" >
+                            <TextBlock TextAlignment="Center" LineHeight="12">
+                                Rollback to<LineBreak/>PCA 2011 Bootloader
+                            </TextBlock>
+                        </Button>
+                    </StackPanel>
+
                     <StackPanel Orientation="Horizontal" Margin="14,1,0,0">
-                        <TextBlock Text="Thumbprint : " 
-                   FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
-                        <TextBlock x:Name="TxtBootEspThumb" Text="..."
-                   FontSize="10" Foreground="#FF324873"
+                        <TextBlock Text="SVN : "  FontSize="11" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootEspSVN" Text="..." FontWeight="Bold" FontSize="11" Foreground="#FF324873"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="14,1,0,0">
+                        <TextBlock Text="Thumbprint : "  FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootEspThumb" Text="..." FontSize="10" Foreground="#FF324873"
                    ToolTip="{Binding ElementName=TxtBootEspThumb, Path=Tag}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="14,1,0,4">
-                        <TextBlock Text="Version : " 
-                   FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
-                        <TextBlock x:Name="TxtBootEspVersion" Text="..."
-                   FontSize="10" Foreground="#FF324873" TextWrapping="Wrap" Width="140"/>
-                    </StackPanel>
+                        <TextBlock Text="Version : " FontSize="10" FontWeight="SemiBold" Foreground="#FF324873"/>
+                        <TextBlock x:Name="TxtBootEspVersion" Text="..." FontSize="10" Foreground="#FF324873" TextWrapping="Wrap" Width="140"/>
+                    </StackPanel>-->
+                    
                 </StackPanel>
 
                 <Border Grid.Row="3" Grid.Column="1" Margin="20,5,0,0" Padding="4,0" 
@@ -1131,6 +1218,8 @@ $TxtBootSysVersion = Get-XamlControl -Name "TxtBootSysVersion"
 $TxtBootEspLabel  = Get-XamlControl -Name "TxtBootEspLabel"
 $TxtBootEspThumb  = Get-XamlControl -Name "TxtBootEspThumb"
 $TxtBootEspVersion = Get-XamlControl -Name "TxtBootEspVersion"
+
+$BtnRollback     = Get-XamlControl -Name "BtnRollback"
 
 $TxtLastRefresh = Get-XamlControl -Name "TxtLastRefresh"
 
@@ -1259,7 +1348,7 @@ function Get-BiosInfo {
         # Retrieve System Family and Machine Type
         $csp = Get-CimInstance Win32_ComputerSystemProduct
         $systemFamily = $csp.Version
-        $machineType = $csp.Name.Substring(0, 4)
+        $machineType = $csp.Name
         
         # Display
         $SystemFamilyControl.Text = $systemFamily
@@ -2359,6 +2448,14 @@ function Invoke-MainAction {
             $TxtBootEspVersion.Text = $bootInfo.ESP_Version
         }
 
+        # Active Rollback uniquement si le système est PCA 2011 et l'ESP est CA 2023
+        if ($BtnRollback) {
+            $BtnRollback.IsEnabled = (
+                $TxtBootSysLabel.Text -eq "PCA 2011" -and
+                $TxtBootEspLabel.Text -eq "CA 2023"
+                )
+            }
+
         # Event TPM-WMI : 1799, 1801, 1802, 1803 if exists
         Get-TPMEventByID -EventID 1799 -NumControl $_1799_Num -StatusControl $_1799_Status -MessageControl $_1799_Message -WrapPanelControl $WrapPanel_1799
         Get-TPMEventByID -EventID 1801 -NumControl $_1801_Num -StatusControl $_1801_Status -MessageControl $_1801_Message -WrapPanelControl $WrapPanel_1801
@@ -2487,6 +2584,66 @@ if ($Log_CSV) {
         }
     })
 }
+
+# Rollback ESP bootloader to PCA 2011 (diagnostic / test use)
+if ($BtnRollback) {
+    $BtnRollback.Add_Click({
+        $msg = "This will overwrite the ESP bootloader with C:\Windows\Boot\EFI\bootmgfw.efi (PCA 2011 signed).`n`n" +
+               "Prerequisites (operator's responsibility):`n" +
+               " - BitLocker suspended`n" +
+               " - PCA 2011 still present in Secure Boot db`n" +
+               " - SBAT revision compatible`n`n" +
+               "Proceed with rollback?"
+
+        $confirm = [System.Windows.MessageBox]::Show(
+            $msg,
+            "Rollback Bootloader to PCA 2011",
+            [System.Windows.MessageBoxButton]::YesNo,
+            [System.Windows.MessageBoxImage]::Warning
+        )
+        if ($confirm -ne [System.Windows.MessageBoxResult]::Yes) {
+            Update-StatusLabel -Message "Rollback cancelled by user" -Color "OrangeRed"
+            return
+        }
+
+        $espDrive   = "$($script:EspDriveLetter):"
+        $espMounted = $false
+        $src        = "C:\Windows\Boot\EFI\bootmgfw.efi"
+        $dst        = "$espDrive\EFI\Microsoft\Boot\bootmgfw.efi"
+
+        try {
+            if (-not (Test-Path $src)) {
+                Update-StatusLabel -Message "Source not found : $src" -Color "Red"
+                return
+            }
+
+            if (Test-Path $espDrive) {
+                Update-StatusLabel -Message "Drive $espDrive already in use, cannot mount ESP" -Color "Red"
+                return
+            }
+
+            & mountvol $espDrive /S 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                Update-StatusLabel -Message "ESP mount failed (run as Administrator)" -Color "Red"
+                return
+            }
+            $espMounted = $true
+
+            Copy-Item -Path $src -Destination $dst -Force -ErrorAction Stop
+            Update-StatusLabel -Message "Rollback done : $dst overwritten with PCA 2011 binary" -Color "Green"
+        }
+        catch {
+            Update-StatusLabel -Message "Rollback error : $_" -Color "Red"
+        }
+        finally {
+            if ($espMounted) { mountvol $espDrive /D | Out-Null }
+        }
+
+        # Refresh UI to reflect new state
+        Invoke-MainAction
+    })
+}
+
 
 # Window loading event
 $window.Add_Loaded({

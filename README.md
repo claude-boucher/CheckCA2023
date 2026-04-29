@@ -137,6 +137,17 @@ Click the **MORE** button to expand the interface and reveal two additional diag
 
 ![CheckCA2023 Interface - More](images/Main_1.3.0_More.png)
 
+- **Show GUID** view *(since v1.4.0)*: reveals `SignatureOwner` GUIDs in the 
+  Secure Boot variables panel, with color coding to distinguish Microsoft-owned 
+  (blue) vs OEM-owned (BlueViolet) certificates. Critical for diagnosing 
+  misattributed CA 2023 entries in `db` causing BitLocker recovery issues.
+  
+- **Rollback to PCA 2011 Bootloader** *(since v1.5.0, diagnostic)*: restores 
+  the original PCA 2011 ESP bootloader for test rollback scenarios on 
+  downgraded BIOS. Enabled only when System=PCA 2011 and ESP=CA 2023. 
+  Operator is responsible for prerequisites (BitLocker suspension, db 
+  contents, SBAT compatibility).
+
 ### AvailableUpdates details
 
 A bit-level breakdown of the `AvailableUpdates` registry value, displaying all 13 individual bit flags with their hex value, sequence order, and designation.

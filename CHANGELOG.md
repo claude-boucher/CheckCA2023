@@ -6,6 +6,41 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [1.5.0] - 2026-04-29
+
+### Added
+- **Rollback button** in ESP bootloader panel: one-click rollback to PCA 2011 by 
+  overwriting `S:\EFI\Microsoft\Boot\bootmgfw.efi` with the system 
+  `C:\Windows\Boot\EFI\bootmgfw.efi` (PCA 2011 signed).
+- Button is enabled only when System bootloader is **PCA 2011** and ESP bootloader 
+  is **CA 2023** — the only state where rollback is meaningful.
+- Confirmation dialog with explicit prerequisite reminders (BitLocker suspended, 
+  PCA 2011 still in db, SBAT compatibility).
+- Tooltip styled with the existing `BitToolTipStyle` for visual consistency.
+
+### Changed
+- ESP bootloader panel layout refactored from stacked StackPanels into a 
+  2-column Grid to host the Rollback button on the right.
+
+### Notes
+- Rollback is intended for **diagnostic and test rollback only** (BIOS 
+  downgrade scenarios, certificate-installation procedure validation).
+- Operator is responsible for prerequisites — no automated checks performed.
+- Action is not logged to CSV.
+
+## [1.4.0] - 2026-04-08
+
+### Added
+- **"Show GUID" checkbox** in the Secure Boot variables panel: displays the 
+  `SignatureOwner` GUID of each certificate alongside its CN.
+- Color coding for ownership identification:
+  - **Blue** — Microsoft-owned certificates (expected GUID)
+  - **BlueViolet** — OEM-owned certificates (Lenovo or other vendor GUID)
+- Enables fast diagnosis of misattributed certificates in `db` — typical 
+  symptom: BitLocker recovery loop after KB updates due to wrong 
+  `SignatureOwner` on Windows UEFI CA 2023 (observed on ThinkCentre neo 50q 
+  Gen 4 fleet).
+
 ## [1.3.0] - 2026-03-18
 
 ### Highlights
