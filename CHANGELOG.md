@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [1.5.0] - 2026-04-29
+## [1.5.0] - 2026-05-05
 
 ### Added
 - **Rollback button** in ESP bootloader panel: one-click rollback to PCA 2011 by 

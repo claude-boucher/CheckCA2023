@@ -351,4 +351,5 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 ---
 
+
 *CheckCA2023 v1.3.0 — Helping IT professionals navigate the Microsoft CA 2023 Secure Boot certificate transition.*

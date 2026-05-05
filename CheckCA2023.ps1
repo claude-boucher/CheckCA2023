@@ -1,8 +1,7 @@
 ﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
-    Application CheckCA2023 with XAML interface to read all the datas involved 
-    in the Windows UEFI CA 2023 update process.
+    Application CheckCA2023 with XAML interface to read all the datas involved in the Windows UEFI CA 2023 update process.
 .DESCRIPTION
     Read data from WMI BIOS, SecureBoot certificate databases, Registry, 
     and TPM-WMI events. Display results in a WPF window with a refresh button.
@@ -10,7 +9,7 @@
     Author  : Claude Boucher - sometools.eu
     Contact : checkca2023@sometools.eu
     Version : 1.5.0
-    Date    : 2026-04-28
+    Date    : 2026-05-05
     License : MIT
     GitHub  : https://github.com/claude-boucher/CheckCA2023
 #>
